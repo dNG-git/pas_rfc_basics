@@ -29,12 +29,13 @@ import re
 try:
 #
 	import http.client as http_client
-	from urllib.parse import quote as url_quote
+	from urllib.parse import quote, urlsplit
 #
 except ImportError:
 #
 	import httplib as http_client
-	from urllib import quote as url_quote
+	from urllib import quote
+	from urlparse import urlsplit
 #
 
 from .basics import direct_basics
@@ -55,12 +56,17 @@ HTTP support is provided for requesting and parsing data.
             Mozilla Public License, v. 2.0
 	"""
 
-	def __init__(self, url, timeout = 6, event_handler = None):
+	RE_HEADER_FIELD_ESCAPED = re.compile("([\\\]+)$")
+	"""
+RegExp to find escape characters
+	"""
+
+	def __init__(self, uri, timeout = 6, event_handler = None):
 	#
 		"""
 Constructor __init__(direct_http)
 
-:param url: URL to be called
+:param uri: URI to be called
 :param timeout: Connection timeout in seconds
 :param event_handler: EventHandler to use
 
@@ -68,7 +74,6 @@ Constructor __init__(direct_http)
 		"""
 
 		global _typed_object
-		if (event_handler != None): event_handler.debug("#echo(__FILEPATH__)# -http.__init__()- (#echo(__LINE__)#)")
 
 		self.auth_username = None
 		"""
@@ -99,50 +104,92 @@ Request host
 		"""
 Request body length
 		"""
+		self.path = None
+		"""
+Request path
+		"""
 		self.port = None
 		"""
 Request port
 		"""
-		self.uri = None
+		self.timeout = timeout
 		"""
-Request URI
+Connection timeout in seconds
 		"""
 
-		if (str != _typed_object['unicode_type'] and type(url) == _typed_object['unicode_type']): url = _typed_object['str'](url, "utf-8")
-		re_result = re.match("^http://(.+?)@(.+?):(\\d+)(.*?)$", url)
+		if (str != _typed_object['unicode_type'] and type(uri) == _typed_object['unicode_type']): uri = _typed_object['str'](uri, "utf-8")
+		self.configure(uri)
+	#
 
-		if (re_result == None): re_result = re.match("^http://(.+?):(\\d+)(.*?)$", url)
-		else:
+	def build_request_parameters(self, params = None, separator = ";"):
+	#
+		"""
+Build a HTTP query string based on the given parameters and the separator.
+
+:param params: Query parameters as dict
+:param separator: Query parameter separator
+
+:access: protected
+:return: (mixed) Response data; Exception on error
+:since:  v0.1.00
+		"""
+
+		var_return = None
+
+		if (type(params) == dict):
 		#
-			auth_data = re_result.group(1).split(":", 1)
-			re_result = re.match("^http://(.+?):(\\d+)(.*?)$", "http://{0}:{1}{2}".format(re_result.group(2), re_result.group(3), re_result.group(4)))
+			params_list = [ ]
 
-			if (len (auth_data) > 1): self.auth_password = auth_data[1]
-			else: self.auth_password = ""
-
-			self.auth_username = auth_data[0]
-		#
-
-		if (re_result == None):
-		#
-			re_result = re.match("^http://(.+?)/(.*?)$", url)
-			self.port = http_client.HTTP_PORT
-
-			if (re_result != None):
+			for key in params:
 			#
-				self.host = re_result.group(1)
-				self.uri = "/{0}".format(re_result.group(2))
+				if (type(params[key]) != bool): params_list.append("{0}={1}".format(quote(str(key)), quote(str(params[key]))))
+				elif (params[key]): params_list.append("{0}=1".format(quote(str(key))))
+				else: params_list.append("{0}=0".format(quote(str(key))))
 			#
-		#
-		else:
-		#
-			self.host = re_result.group(1)
-			self.port = int(re_result.group(2))
-			self.uri = re_result.group(3)
+
+			var_return = separator.join(params_list)
 		#
 
-		try: self.connection = http_client.HTTPConnection(self.host, self.port, timeout = timeout)
-		except TypeError: self.connection = http_client.HTTPConnection(self.host, self.port)
+		return var_return
+	#
+
+	def configure(self, uri):
+	#
+		"""
+Returns a connection to the HTTP server.
+
+:param uri: URI to be called
+
+:access: protected
+:since:  v0.1.00
+		"""
+
+		url_elements = urlsplit(uri)
+		if (url_elements.username != None): self.auth_username = url_elements.username
+		if (url_elements.password != None): self.auth_password = url_elements.password
+
+		if (url_elements.hostname != None): self.host = url_elements.hostname
+		self.port = (http_client.HTTP_PORT if (url_elements.port == None) else url_elements.port)
+		self.path = url_elements.path
+	#
+
+	def get_connection(self):
+	#
+		"""
+Returns a connection to the HTTP server.
+
+:access: protected
+:return: (mixed) Response data; Exception on error
+:since:  v0.1.00
+		"""
+
+		if (self.connection == None):
+		#
+			try: self.connection = http_client.HTTPConnection(self.host, self.port, timeout = self.timeout)
+			except TypeError: self.connection = http_client.HTTPConnection(self.host, self.port)
+		#
+
+		return self.connection
 	#
 
 	def request(self, method, separator = ";", params = None, data = None):
@@ -164,17 +211,17 @@ Call a given request method on the connected HTTP server.
 
 		try:
 		#
-			url = self.uri
+			path = self.path
 
 			if (type(params) == str):
 			#
-				if ("?" not in url): url += "?"
-				elif (not url.endswith(separator)): url += separator
+				if ("?" not in path): path += "?"
+				elif (not path.endswith(separator)): path += separator
 
-				url += params
+				path += params
 			#
 
-			kwargs = { "url": self.uri }
+			kwargs = { "url": path }
 
 			if (data != None):
 			#
@@ -192,8 +239,9 @@ Call a given request method on the connected HTTP server.
 			#
 			elif (self.headers != None): kwargs['headers'] = self.headers
 
-			self.connection.request(method, **kwargs)
-			response = self.connection.getresponse()
+			connection = self.get_connection()
+			connection.request(method, **kwargs)
+			response = connection.getresponse()
 
 			var_return = { "headers": { } }
 			for header in response.getheaders(): var_return['headers'][header[0].lower().replace("-", "_")] = header[1]
@@ -218,21 +266,24 @@ Do a GET request on the connected HTTP server.
 :since:  v0.1.00
 		"""
 
-		if (type(params) == dict):
-		#
-			params_list = [ ]
-
-			for key in params:
-			#
-				if (type(params[key]) != bool): params_list.append("{0}={1}".format(url_quote(str(key)), url_quote(str(params[key]))))
-				elif (params[key]): params_list.append("{0}=1".format(url_quote(str(key))))
-				else: params_list.append("{0}=0".format(url_quote(str(key))))
-			#
-
-			params = separator.join(params_list)
-		#
-
+		params = self.build_request_parameters(params, separator)
 		return self.request("GET", separator, params)
+	#
+
+	def request_head(self, params = None, separator = ";"):
+	#
+		"""
+Do a HEAD request on the connected HTTP server.
+
+:param params: Query parameters as dict
+:param separator: Query parameter separator
+
+:return: (mixed) Response data; Exception on error
+:since:  v0.1.00
+		"""
+
+		params = self.build_request_parameters(params, separator)
+		return self.request("HEAD", separator, params)
 	#
 
 	def request_post(self, data = None, params = None, separator = ";"):
@@ -248,20 +299,7 @@ Do a POST request on the connected HTTP server.
 :since:  v0.1.00
 		"""
 
-		if (type(params) == dict):
-		#
-			params_list = [ ]
-
-			for key in params:
-			#
-				if (type(params[key]) != bool): params_list.append("{0}={1}".format(url_quote(str(key)), url_quote(str(params[key]))))
-				elif (params[key]): params_list.append("{0}=1".format(url_quote(str(key))))
-				else: params_list.append("{0}=0".format(url_quote(str(key))))
-			#
-
-			params = separator.join(params_list)
-		#
-
+		params = self.build_request_parameters(params, separator)
 		return self.request("POST", separator, params, data)
 	#
 
@@ -301,7 +339,6 @@ Sets the EventHandler.
 :since: v0.1.00
 		"""
 
-		if (event_handler != None): event_handler.debug("#echo(__FILEPATH__)# -http.set_event_handler(event_handler)- (#echo(__LINE__)#)")
 		self.event_handler = event_handler
 	#
 
@@ -328,6 +365,101 @@ Returns a RFC 2616 compliant dict of headers from the entire message.
 
 		return var_return
 	#
+
+	@staticmethod
+	def header_field_list(message):
+	#
+		"""
+Returns a RFC 2616 compliant list of fields from a header message.
+
+:param field: Header message
+
+:return: (str) List containing str or dict if a field name was identified;
+         False on error
+:since:  v0.1.00
+		"""
+
+		var_return = [ ]
+
+		fields = [ ]
+		last_position = 0
+		message_length = (len(message) if (type(message) == str) else 0)
+
+		while (last_position > -1 and last_position < message_length):
+		#
+			comma_position = message.find(",", last_position)
+			quotation_mark_position = message.find('"', last_position)
+			next_position = -1
+
+			if (comma_position > -1): next_position = comma_position
+
+			if (quotation_mark_position > -1 and (next_position < 0 or next_position > quotation_mark_position)):
+			#
+				next_position = direct_http.header_field_list_find_end_position(message[last_position:], quotation_mark_position - last_position, '"')
+				if (next_position > -1): next_position += last_position
+			#
+
+			if (next_position < 0):
+			#
+				fields.append(message[last_position:])
+				last_position = -1
+			#
+			else:
+			#
+				fields.append(message[last_position:next_position])
+				if (message[next_position:1 + next_position] == ","): next_position += 1
+				last_position = next_position
+			#
+		#
+
+		for field in fields:
+		#
+			if (":" in field):
+			#
+				field = field.split(":", 1)
+				field = { field[0].strip(): field[1].strip() }
+			#
+			else: field.strip()
+
+			var_return.append(field)
+		#
+
+		return var_return
+	#
+
+	@staticmethod
+	def header_field_list_find_end_position(data, position, end_char):
+	#
+		"""
+Returns a RFC 2616 compliant list of fields from a header message.
+
+:param field: Header message
+
+:access: protected
+:return: (str) List containing str or dict if a field name was identified;
+         False on error
+:since:  v0.1.00
+		"""
+
+		next_position = position
+		var_return = -1
+
+		while (end_char != None):
+		#
+			next_position = data.find(end_char, 1 + next_position)
+			re_result = (None if (next_position < 1) else direct_http.RE_HEADER_FIELD_ESCAPED.search(data[position:next_position]))
+
+			if (next_position < 1): end_char = None
+			elif (re_result == None or (len(re_result.group(1)) % 2) == 0):
+			#
+				var_return = 1 + next_position
+				end_char = None
+			#
+		#
+
+		return var_return
+	#
+#
 #
 
 ##j## EOF
