@@ -61,12 +61,12 @@ HTTP support is provided for requesting and parsing data.
 RegExp to find escape characters
 	"""
 
-	def __init__(self, uri, timeout = 6, event_handler = None):
+	def __init__(self, url, timeout = 6, event_handler = None):
 	#
 		"""
 Constructor __init__(direct_http)
 
-:param uri: URI to be called
+:param url: URL to be called
 :param timeout: Connection timeout in seconds
 :param event_handler: EventHandler to use
 
@@ -117,8 +117,8 @@ Request port
 Connection timeout in seconds
 		"""
 
-		if (str != _typed_object['unicode_type'] and type(uri) == _typed_object['unicode_type']): uri = _typed_object['str'](uri, "utf-8")
-		self.configure(uri)
+		if (str != _typed_object['unicode_type'] and type(url) == _typed_object['unicode_type']): url = _typed_object['str'](url, "utf-8")
+		self.configure(url)
 	#
 
 	def build_request_parameters(self, params = None, separator = ";"):
@@ -153,18 +153,18 @@ Build a HTTP query string based on the given parameters and the separator.
 		return var_return
 	#
 
-	def configure(self, uri):
+	def configure(self, url):
 	#
 		"""
 Returns a connection to the HTTP server.
 
-:param uri: URI to be called
+:param url: URL to be called
 
 :access: protected
 :since:  v0.1.00
 		"""
 
-		url_elements = urlsplit(uri)
+		url_elements = urlsplit(url)
 		if (url_elements.username != None): self.auth_username = url_elements.username
 		if (url_elements.password != None): self.auth_password = url_elements.password
 
