@@ -40,8 +40,22 @@ except ImportError:
 
 from .basics import direct_basics
 
-try: _typed_object = { "bytes": unicode.encode, "bytes_type": str, "str": unicode.encode, "unicode": str.decode, "unicode_type": unicode }
-except: _typed_object = { "bytes": str.encode, "bytes_type": bytes, "str": bytes.decode, "unicode": bytes.decode, "unicode_type": str }
+try:
+#
+	_PY_BYTES = unicode.encode
+	_PY_BYTES_TYPE = str
+	_PY_STR = unicode.encode
+	_PY_UNICODE = str.decode
+	_PY_UNICODE_TYPE = unicode
+#
+except:
+#
+	_PY_BYTES = str.encode
+	_PY_BYTES_TYPE = bytes
+	_PY_STR = bytes.decode
+	_PY_UNICODE = bytes.decode
+	_PY_UNICODE_TYPE = str
+#
 
 class direct_http(direct_basics):
 #
@@ -73,7 +87,7 @@ Constructor __init__(direct_http)
 :since: v0.1.00
 		"""
 
-		global _typed_object
+		global _PY_STR, _PY_UNICODE_TYPE
 
 		self.auth_username = None
 		"""
@@ -100,6 +114,10 @@ Request headers
 		"""
 Request host
 		"""
+		self.ipv6_link_local_interface = None
+		"""
+IPv6 link local interface to be used for outgoing requests
+		"""
 		self.length = -1
 		"""
 Request body length
@@ -117,7 +135,7 @@ Request port
 Connection timeout in seconds
 		"""
 
-		if (str != _typed_object['unicode_type'] and type(url) == _typed_object['unicode_type']): url = _typed_object['str'](url, "utf-8")
+		if (str != _PY_UNICODE_TYPE and type(url) == _PY_UNICODE_TYPE): url = _PY_STR(url, "utf-8")
 		self.configure(url)
 	#
 
@@ -167,10 +185,11 @@ Returns a connection to the HTTP server.
 		url_elements = urlsplit(url)
 		if (url_elements.username != None): self.auth_username = url_elements.username
 		if (url_elements.password != None): self.auth_password = url_elements.password
-
-		if (url_elements.hostname != None): self.host = url_elements.hostname
+		if (url_elements.hostname != None): self.host = ("[{0}]".format(url_elements.hostname) if (":" in url_elements.hostname) else url_elements.hostname)
 		self.port = (http_client.HTTP_PORT if (url_elements.port == None) else url_elements.port)
+
 		self.path = url_elements.path
+		if (url_elements.query != ""): self.path = "{0}?{1}".format(self.path, url_elements.query)
 	#
 
 	def get_connection(self):
@@ -185,8 +204,15 @@ Returns a connection to the HTTP server.
 
 		if (self.connection == None):
 		#
-			try: self.connection = http_client.HTTPConnection(self.host, self.port, timeout = self.timeout)
-			except TypeError: self.connection = http_client.HTTPConnection(self.host, self.port)
+			if (":" in self.host):
+			#
+				host = self.host[1:-1]
+				if (host[:6] == "fe80::" and self.ipv6_link_local_interface != None): host = "{0}%{1}".format(self.host[1:-1], self.ipv6_link_local_interface)
+			#
+			else: host = self.host
+
+			try: self.connection = http_client.HTTPConnection(host, self.port, timeout = self.timeout)
+			except TypeError: self.connection = http_client.HTTPConnection(host, self.port)
 		#
 
 		return self.connection
@@ -206,7 +232,7 @@ Call a given request method on the connected HTTP server.
 :since:  v0.1.00
 		"""
 
-		global _typed_object
+		global _PY_BYTES, _PY_BYTES_TYPE, _PY_STR, _PY_UNICODE
 		if (self.event_handler != None): self.event_handler.debug("#echo(__FILEPATH__)# -http.request({0}, separator, params, data)- (#echo(__LINE__)#)".format(method))
 
 		try:
@@ -225,14 +251,14 @@ Call a given request method on the connected HTTP server.
 
 			if (data != None):
 			#
-				if (type(data) != _typed_object['bytes_type']): data = _typed_object['bytes'](data, "utf-8")
+				if (type(data) != _PY_BYTES_TYPE): data = _PY_BYTES(data, "raw_unicode_escape")
 				kwargs['body'] = data
 			#
 
 			if (self.auth_username != None):
 			#
-				base64_data = b64encode(_typed_object['unicode']("{0}:{1}".format(self.auth_username,self.auth_password), "utf-8"))
-				if (type(base64_data) != str): base64_data = _typed_object['str'](base64_data, "utf-8")
+				base64_data = b64encode(_PY_UNICODE("{0}:{1}".format(self.auth_username, self.auth_password), "utf-8"))
+				if (type(base64_data) != str): base64_data = _PY_STR(base64_data, "raw_unicode_escape")
 
 				kwargs['headers'] = { "Authorization": "Basic {0}".format(base64_data) }
 				if (self.headers != None): kwargs['headers'].update(self.headers)
@@ -316,6 +342,7 @@ Sets a header.
 		"""
 
 		if (self.headers == None): self.headers = { }
+		name = name.upper()
 
 		if (value == None):
 		#
@@ -340,6 +367,20 @@ Sets the EventHandler.
 		"""
 
 		self.event_handler = event_handler
+	#
+
+	def set_ipv6_link_local_interface(self, interface):
+	#
+		"""
+Forces the given interface to be used for outgoing IPv6 link local
+addresses.
+
+:param interface: Header name
+
+:since: v0.1.01
+		"""
+
+		self.ipv6_link_local_interface = interface
 	#
 
 	@staticmethod
@@ -419,7 +460,7 @@ Returns a RFC 2616 compliant list of fields from a header message.
 				field = field.split(":", 1)
 				field = { field[0].strip(): field[1].strip() }
 			#
-			else: field.strip()
+			else: field = field.strip()
 
 			var_return.append(field)
 		#

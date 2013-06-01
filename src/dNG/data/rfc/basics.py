@@ -24,7 +24,11 @@ http://www.direct-netware.de/redirect.py?licenses;mpl2
 NOTE_END //n"""
 
 from calendar import timegm
+from datetime import datetime
 import re, time
+
+try: from pytz import timezone
+except ImportError: timezone = None
 
 try: _unicode_object = { "type": unicode, "str": unicode.encode }
 except: _unicode_object = { "type": bytes, "str": bytes.decode }
@@ -89,7 +93,7 @@ Parses a string of headers.
 
 				if (len(header) == 2):
 				#
-					header_name = header[0].strip().lower().replace("-", "_")
+					header_name = header[0].strip().upper()
 					header[1] = header[1].strip()
 
 					if (header_name in var_return):
@@ -111,6 +115,115 @@ Parses a string of headers.
 	#
 
 	@staticmethod
+	def get_iso8601_timestamp(value, date = True, has_time = True, has_timezone = True, current_day = True):
+	#
+		"""
+Returns the UNIX timestamp for a ISO-8601 compliant date and time. Please note
+that timezone names can only be handled if pytz is available.
+
+:param value: ISO-8601 compliant date and / or time
+
+:return: (int) UNIX timestamp
+:since:  v0.1.00
+		"""
+
+		if (current_day and (not date)):
+		#
+			time_struct = time.gmtime()
+
+			year = "{0:d}".format(time_struct.tm_year)
+			month = "{0:d}".format(time_struct.tm_mon)
+			day = "{0:d}".format(time_struct.tm_mday)
+		#
+		else:
+		#
+			year = "1970"
+			month = "01"
+			day = "01"
+		#
+
+		hours = "00"
+		minutes = "00"
+		offset = 0
+		operator = 1
+		seconds = "00"
+		time_data = ""
+		time_format = ""
+		timezone_offset = 0
+		value_length = len(value)
+		weeks_offset = 0
+
+		if (date):
+		#
+			char = value[:1]
+
+			if (char == "+" or char == "-"):
+			#
+				offset = 1
+				operator = (-1 if (char == "-") else 1)
+				year = value[1:5]
+			#
+			else:
+			#
+				offset = 0
+				year = value[:4]
+			#
+
+			if (5 + offset < value_length):
+			#
+				char = value[4 + offset:5 + offset]
+
+				if (char == "-"):
+				#
+					char = value[5 + offset:6 + offset]
+					offset += 1
+				#
+
+				if (char == "W" and 6 + offset < value_length): weeks_offset = 604800 * int(value[5 + offset:7 + offset])
+				else: month = value[4 + offset:6 + offset]
+			#
+
+			if (7 + offset < value_length):
+			#
+				char = value[6 + offset:7 + offset]
+				if (char == "-"): offset += 1
+				day = value[6 + offset:8 + offset]
+			#
+
+			offset += 8
+		#
+
+		if (has_time and 7 + offset < value_length and (offset < 1 or value[offset:1 + offset] == "T")):
+		#
+			if (offset > 0): offset += 1
+
+			hours = value[offset:2 + offset]
+			minutes = value[3 + offset:5 + offset]
+			seconds = value[6 + offset:8 + offset]
+			time_data = "{0}{1}{2}".format(hours, minutes, seconds)
+			time_format = "%H%M%S"
+
+			py_datetime = datetime.strptime("{0}{1}{2}{3}".format(year, month, day, time_data), "%Y%m%d{0}".format(time_format))
+
+			if (has_timezone and 8 + offset < value_length):
+			#
+				timezone_value = value[8 + offset:]
+
+				if (":" in timezone_value):
+				#
+					timezone_value = timezone_value.split(":", 1)
+					timezone_offset = (-3600 * int(timezone_value[0])) + (60 * int(timezone_value[1]))
+				#
+				elif (timezone == None): raise RuntimeError("Timezone names are only available if pytz is available", 65)
+				else: timezone_offset = -1 * timezone(timezone_value).utcoffset(py_datetime).total_seconds()
+			#
+		#
+		else: py_datetime = datetime.strptime("{0}{1}{2}".format(year, month, day), "%Y%m%d")
+
+		return operator * int((py_datetime.utctimestamp() if (hasattr(py_datetime, "utctimestamp")) else timegm(py_datetime.timetuple())) + weeks_offset + timezone_offset)
+	#
+
+	@staticmethod
 	def get_rfc1123_datetime(timestamp):
 	#
 		"""
@@ -118,7 +231,6 @@ Returns a RFC 1123 compliant date and time.
 
 :param timestamp: UNIX timestamp
 
-:access: protected
 :return: (str) RFC 1123 compliant date and time
 :since:  v0.1.00
 		"""
@@ -135,11 +247,10 @@ Returns a RFC 1123 compliant date and time.
 	def get_rfc1123_timestamp(datetime):
 	#
 		"""
-Returns a RFC 1123 compliant date and time.
+Returns the UNIX timestamp for a RFC 1123 compliant date and time.
 
 :param datetime: RFC 1123 compliant date and time
 
-:access: protected
 :return: (int) UNIX timestamp
 :since:  v0.1.00
 		"""
@@ -161,11 +272,10 @@ Returns a RFC 1123 compliant date and time.
 	def get_rfc2616_timestamp(datetime):
 	#
 		"""
-Returns a RFC 2616 compliant date and time.
+Returns the UNIX timestamp for a RFC 2616 compliant date and time.
 
 :param datetime: RFC 2616 compliant date and time
 
-:access: protected
 :return: (int) UNIX timestamp
 :since:  v0.1.00
 		"""
