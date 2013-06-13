@@ -25,15 +25,24 @@ NOTE_END //n"""
 
 from calendar import timegm
 from datetime import datetime
-import re, time
+import re
+import time
 
 try: from pytz import timezone
 except ImportError: timezone = None
 
-try: _unicode_object = { "type": unicode, "str": unicode.encode }
-except: _unicode_object = { "type": bytes, "str": bytes.decode }
+try:
+#
+	_PY_STR = unicode.encode
+	_PY_UNICODE_TYPE = unicode
+#
+except:
+#
+	_PY_STR = bytes.decode
+	_PY_UNICODE_TYPE = str
+#
 
-class direct_basics(object):
+class Basics(object):
 #
 	"""
 This class provides basic functions described in different RFCs.
@@ -75,14 +84,14 @@ Parses a string of headers.
 :since:  v0.1.00
 		"""
 
-		global _unicode_object
+		global _PY_STR, _PY_UNICODE_TYPE
 		var_return = False
 
-		if (data == _unicode_object['type']): data = _unicode_object['str'](data, "utf-8")
+		if (str != _PY_UNICODE_TYPE and type(data) == _PY_UNICODE_TYPE): data = _PY_STR(data, "utf-8")
 
 		if (type(data) == str and len(data) > 0):
 		#
-			data = direct_basics.RE_HEADER_FOLDED_LINE.sub("\\2\\4\\6", data)
+			data = Basics.RE_HEADER_FOLDED_LINE.sub("\\2\\4\\6", data)
 			var_return = { }
 
 			headers = data.split("\r\n")
@@ -131,9 +140,9 @@ that timezone names can only be handled if pytz is available.
 		#
 			time_struct = time.gmtime()
 
-			year = "{0:d}".format(time_struct.tm_year)
-			month = "{0:d}".format(time_struct.tm_mon)
-			day = "{0:d}".format(time_struct.tm_mday)
+			year = str(time_struct.tm_year)
+			month = str(time_struct.tm_mon)
+			day = str(time_struct.tm_mday)
 		#
 		else:
 		#
@@ -237,8 +246,8 @@ Returns a RFC 1123 compliant date and time.
 
 		time_struct = time.gmtime(timestamp)
 		var_return = time.strftime("%%a, %d %%b %Y %H:%M:%S GMT", time_struct)
-		var_return = var_return.replace("%a", direct_basics.RFC1123_DAYS[time_struct.tm_wday], 1)
-		var_return = var_return.replace("%b", direct_basics.RFC1123_MONTHS[time_struct.tm_mon - 1], 1)
+		var_return = var_return.replace("%a", Basics.RFC1123_DAYS[time_struct.tm_wday], 1)
+		var_return = var_return.replace("%b", Basics.RFC1123_MONTHS[time_struct.tm_mon - 1], 1)
 
 		return var_return
 	#
@@ -258,10 +267,10 @@ Returns the UNIX timestamp for a RFC 1123 compliant date and time.
 		re_result = re.match("(\w{3}), (\d{1,2}) (\w{3}) (\d{2,4}) (\d{1,2}):(\d{1,2}):(\d{1,2}) (\w{3}|[+-]\d{1,2}:\d{1,2})$", datetime)
 		if (re_result == None): raise ValueError("Given date and time is not RFC 1123 compliant formatted", 38)
 
-		mon = direct_basics.RFC1123_MONTHS.index(re_result.group(3))
+		mon = Basics.RFC1123_MONTHS.index(re_result.group(3))
 		mon = ("0{0:d}".format(1 + mon) if (mon < 9) else str(1 + mon))
 
-		wday = direct_basics.RFC1123_DAYS.index(re_result.group(1))
+		wday = Basics.RFC1123_DAYS.index(re_result.group(1))
 		wday = (0 if (wday > 5) else 1 + wday)
 
 		timezone_format = ("%z" if (":" in re_result.group(7)) else ("%Z"))
@@ -282,7 +291,7 @@ Returns the UNIX timestamp for a RFC 2616 compliant date and time.
 
 		var_return = None
 
-		try: var_return = direct_basics.get_rfc1123_timestamp(datetime)
+		try: var_return = Basics.get_rfc1123_timestamp(datetime)
 		except: pass
 
 		if (var_return == None): # RFC 850
@@ -291,10 +300,10 @@ Returns the UNIX timestamp for a RFC 2616 compliant date and time.
 
 			if (re_result != None):
 			#
-				mon = direct_basics.RFC1123_MONTHS.index(re_result.group(3))
+				mon = Basics.RFC1123_MONTHS.index(re_result.group(3))
 				mon = ("0{0:d}".format(1 + mon) if (mon < 9) else str(1 + mon))
 
-				wday = direct_basics.RFC850_DAYS.index(re_result.group(1))
+				wday = Basics.RFC850_DAYS.index(re_result.group(1))
 				wday = (0 if (wday > 5) else 1 + wday)
 
 				timezone_format = ("%z" if (":" in re_result.group(7)) else ("%Z"))

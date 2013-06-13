@@ -38,7 +38,7 @@ except ImportError:
 	from urlparse import urlsplit
 #
 
-from .basics import direct_basics
+from .basics import Basics
 
 try:
 #
@@ -57,7 +57,7 @@ except:
 	_PY_UNICODE_TYPE = str
 #
 
-class direct_http(direct_basics):
+class Http(Basics):
 #
 	"""
 HTTP support is provided for requesting and parsing data.
@@ -78,7 +78,7 @@ RegExp to find escape characters
 	def __init__(self, url, timeout = 6, event_handler = None):
 	#
 		"""
-Constructor __init__(direct_http)
+Constructor __init__(Http)
 
 :param url: URL to be called
 :param timeout: Connection timeout in seconds
@@ -396,7 +396,7 @@ Returns a RFC 2616 compliant dict of headers from the entire message.
 		"""
 
 		header = data.split("\r\n\r\n", 1)[0]
-		var_return = direct_basics.get_headers(header)
+		var_return = Basics.get_headers(header)
 
 		if (var_return != False and "@nameless" in var_return and "\n" not in var_return['@nameless']):
 		#
@@ -436,7 +436,7 @@ Returns a RFC 2616 compliant list of fields from a header message.
 
 			if (quotation_mark_position > -1 and (next_position < 0 or next_position > quotation_mark_position)):
 			#
-				next_position = direct_http.header_field_list_find_end_position(message[last_position:], quotation_mark_position - last_position, '"')
+				next_position = Http.header_field_list_find_end_position(message[last_position:], quotation_mark_position - last_position, '"')
 				if (next_position > -1): next_position += last_position
 			#
 
@@ -488,7 +488,7 @@ Returns a RFC 2616 compliant list of fields from a header message.
 		while (end_char != None):
 		#
 			next_position = data.find(end_char, 1 + next_position)
-			re_result = (None if (next_position < 1) else direct_http.RE_HEADER_FIELD_ESCAPED.search(data[position:next_position]))
+			re_result = (None if (next_position < 1) else Http.RE_HEADER_FIELD_ESCAPED.search(data[position:next_position]))
 
 			if (next_position < 1): end_char = None
 			elif (re_result == None or (len(re_result.group(1)) % 2) == 0):
