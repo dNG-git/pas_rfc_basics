@@ -264,7 +264,7 @@ Returns the UNIX timestamp for a RFC 1123 compliant date and time.
 :since:  v0.1.00
 		"""
 
-		re_result = re.match("(\w{3}), (\d{1,2}) (\w{3}) (\d{2,4}) (\d{1,2}):(\d{1,2}):(\d{1,2}) (\w{3}|[+-]\d{1,2}:\d{1,2})$", datetime)
+		re_result = re.match("(\\w{3}), (\\d{1,2}) (\\w{3}) (\\d{2,4}) (\\d{1,2}):(\\d{1,2}):(\\d{1,2}) (\\w{3}|[+\\-]\\d{1,2}:\\d{1,2})$", datetime)
 		if (re_result == None): raise ValueError("Given date and time is not RFC 1123 compliant formatted", 38)
 
 		mon = Basics.RFC1123_MONTHS.index(re_result.group(3))
@@ -296,7 +296,7 @@ Returns the UNIX timestamp for a RFC 2616 compliant date and time.
 
 		if (var_return == None): # RFC 850
 		#
-			re_result = re.match("(\w{6,9}), (\d{1,2})-(\w{3})-(\d{2}) (\d{1,2}):(\d{1,2}):(\d{1,2}) (\w{3}|[+-]\d{1,2}:\d{1,2})$", datetime, re.I)
+			re_result = re.match("(\\w{6,9}), (\\d{1,2})-(\\w{3})-(\\d{2}) (\\d{1,2}):(\\d{1,2}):(\\d{1,2}) (\\w{3}|[+\\-]\\d{1,2}:\\d{1,2})$", datetime)
 
 			if (re_result != None):
 			#

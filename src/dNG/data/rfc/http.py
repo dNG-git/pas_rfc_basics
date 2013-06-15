@@ -70,7 +70,7 @@ HTTP support is provided for requesting and parsing data.
             Mozilla Public License, v. 2.0
 	"""
 
-	RE_HEADER_FIELD_ESCAPED = re.compile("([\\\]+)$")
+	RE_HEADER_FIELD_ESCAPED = re.compile("(\\\\+)$")
 	"""
 RegExp to find escape characters
 	"""
