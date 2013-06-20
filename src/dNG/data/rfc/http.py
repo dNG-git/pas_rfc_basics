@@ -408,15 +408,16 @@ Returns a RFC 2616 compliant dict of headers from the entire message.
 	#
 
 	@staticmethod
-	def header_field_list(message):
+	def header_field_list(field_list, separator = ",", field_separator = ":"):
 	#
 		"""
 Returns a RFC 2616 compliant list of fields from a header message.
 
-:param field: Header message
+:param field: Header field list
+:param separator: Separator between fields
+:param field_separator: Separator between key-value pairs
 
-:return: (str) List containing str or dict if a field name was identified;
-         False on error
+:return: (list) List containing str or dict if a field name was identified
 :since:  v0.1.00
 		"""
 
@@ -424,41 +425,41 @@ Returns a RFC 2616 compliant list of fields from a header message.
 
 		fields = [ ]
 		last_position = 0
-		message_length = (len(message) if (type(message) == str) else 0)
+		field_list_length = (len(field_list) if (type(field_list) == str) else 0)
 
-		while (last_position > -1 and last_position < message_length):
+		while (last_position > -1 and last_position < field_list_length):
 		#
-			comma_position = message.find(",", last_position)
-			quotation_mark_position = message.find('"', last_position)
+			separator_position = field_list.find(separator, last_position)
+			quotation_mark_position = field_list.find('"', last_position)
 			next_position = -1
 
-			if (comma_position > -1): next_position = comma_position
+			if (separator_position > -1): next_position = separator_position
 
 			if (quotation_mark_position > -1 and (next_position < 0 or next_position > quotation_mark_position)):
 			#
-				next_position = Http.header_field_list_find_end_position(message[last_position:], quotation_mark_position - last_position, '"')
+				next_position = Http.header_field_list_find_end_position(field_list[last_position:], quotation_mark_position - last_position, '"')
 				if (next_position > -1): next_position += last_position
 			#
 
 			if (next_position < 0):
 			#
-				fields.append(message[last_position:])
+				fields.append(field_list[last_position:])
 				last_position = -1
 			#
 			else:
 			#
-				fields.append(message[last_position:next_position])
-				if (message[next_position:1 + next_position] == ","): next_position += 1
+				fields.append(field_list[last_position:next_position])
+				if (field_list[next_position:1 + next_position] == separator): next_position += 1
 				last_position = next_position
 			#
 		#
 
 		for field in fields:
 		#
-			if (":" in field):
+			if (field_separator in field):
 			#
-				field = field.split(":", 1)
-				field = { field[0].strip(): field[1].strip() }
+				field = field.split(field_separator, 1)
+				field = { "key": field[0].strip(), "value": field[1].strip() }
 			#
 			else: field = field.strip()
 
@@ -472,9 +473,11 @@ Returns a RFC 2616 compliant list of fields from a header message.
 	def header_field_list_find_end_position(data, position, end_char):
 	#
 		"""
-Returns a RFC 2616 compliant list of fields from a header message.
+Find the position of the given character.
 
-:param field: Header message
+:param data: Data
+:param position: Position offset
+:param end_char: Character
 
 :access: protected
 :return: (str) List containing str or dict if a field name was identified;
