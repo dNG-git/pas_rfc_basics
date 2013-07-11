@@ -85,14 +85,14 @@ Parses a string of headers.
 		"""
 
 		global _PY_STR, _PY_UNICODE_TYPE
-		var_return = False
+		_return = False
 
 		if (str != _PY_UNICODE_TYPE and type(data) == _PY_UNICODE_TYPE): data = _PY_STR(data, "utf-8")
 
 		if (type(data) == str and len(data) > 0):
 		#
 			data = Basics.RE_HEADER_FOLDED_LINE.sub("\\2\\4\\6", data)
-			var_return = { }
+			_return = { }
 
 			headers = data.split("\r\n")
 
@@ -105,22 +105,22 @@ Parses a string of headers.
 					header_name = header[0].strip().upper()
 					header[1] = header[1].strip()
 
-					if (header_name in var_return):
+					if (header_name in _return):
 					#
-						if (type(var_return[header_name]) == list): var_return[header_name].append(header[1])
-						else: var_return[header_name] = [ var_return[header_name], header[1] ]
+						if (type(_return[header_name]) == list): _return[header_name].append(header[1])
+						else: _return[header_name] = [ _return[header_name], header[1] ]
 					#
-					else: var_return[header_name] = header[1]
+					else: _return[header_name] = header[1]
 				#
 				elif (len(header[0]) > 0):
 				#
-					if ("@nameless" in var_return): var_return['@nameless'] += "\n" + header[0].strip()
-					else: var_return['@nameless'] = header[0].strip()
+					if ("@nameless" in _return): _return['@nameless'] += "\n" + header[0].strip()
+					else: _return['@nameless'] = header[0].strip()
 				#
 			#
 		#
 
-		return var_return
+		return _return
 	#
 
 	@staticmethod
@@ -212,7 +212,7 @@ that timezone names can only be handled if pytz is available.
 			time_data = "{0}{1}{2}".format(hours, minutes, seconds)
 			time_format = "%H%M%S"
 
-			py_datetime = datetime.strptime("{0}{1}{2}{3}".format(year, month, day, time_data), "%Y%m%d{0}".format(time_format))
+			_datetime = datetime.strptime("{0}{1}{2}{3}".format(year, month, day, time_data), "%Y%m%d{0}".format(time_format))
 
 			if (has_timezone and 8 + offset < value_length):
 			#
@@ -224,12 +224,12 @@ that timezone names can only be handled if pytz is available.
 					timezone_offset = (-3600 * int(timezone_value[0])) + (60 * int(timezone_value[1]))
 				#
 				elif (timezone == None): raise RuntimeError("Timezone names are only available if pytz is available", 65)
-				else: timezone_offset = -1 * timezone(timezone_value).utcoffset(py_datetime).total_seconds()
+				else: timezone_offset = -1 * timezone(timezone_value).utcoffset(_datetime).total_seconds()
 			#
 		#
-		else: py_datetime = datetime.strptime("{0}{1}{2}".format(year, month, day), "%Y%m%d")
+		else: _datetime = datetime.strptime("{0}{1}{2}".format(year, month, day), "%Y%m%d")
 
-		return operator * int((py_datetime.utctimestamp() if (hasattr(py_datetime, "utctimestamp")) else timegm(py_datetime.timetuple())) + weeks_offset + timezone_offset)
+		return operator * int((_datetime.utctimestamp() if (hasattr(_datetime, "utctimestamp")) else timegm(_datetime.timetuple())) + weeks_offset + timezone_offset)
 	#
 
 	@staticmethod
@@ -245,11 +245,11 @@ Returns a RFC 1123 compliant date and time.
 		"""
 
 		time_struct = time.gmtime(timestamp)
-		var_return = time.strftime("%%a, %d %%b %Y %H:%M:%S GMT", time_struct)
-		var_return = var_return.replace("%a", Basics.RFC1123_DAYS[time_struct.tm_wday], 1)
-		var_return = var_return.replace("%b", Basics.RFC1123_MONTHS[time_struct.tm_mon - 1], 1)
+		_return = time.strftime("%%a, %d %%b %Y %H:%M:%S GMT", time_struct)
+		_return = _return.replace("%a", Basics.RFC1123_DAYS[time_struct.tm_wday], 1)
+		_return = _return.replace("%b", Basics.RFC1123_MONTHS[time_struct.tm_mon - 1], 1)
 
-		return var_return
+		return _return
 	#
 
 	@staticmethod
@@ -289,12 +289,12 @@ Returns the UNIX timestamp for a RFC 2616 compliant date and time.
 :since:  v0.1.00
 		"""
 
-		var_return = None
+		_return = None
 
-		try: var_return = Basics.get_rfc1123_timestamp(datetime)
+		try: _return = Basics.get_rfc1123_timestamp(datetime)
 		except: pass
 
-		if (var_return == None): # RFC 850
+		if (_return == None): # RFC 850
 		#
 			re_result = re.match("(\\w{6,9}), (\\d{1,2})-(\\w{3})-(\\d{2}) (\\d{1,2}):(\\d{1,2}):(\\d{1,2}) (\\w{3}|[+\\-]\\d{1,2}:\\d{1,2})$", datetime)
 
@@ -307,18 +307,18 @@ Returns the UNIX timestamp for a RFC 2616 compliant date and time.
 				wday = (0 if (wday > 5) else 1 + wday)
 
 				timezone_format = ("%z" if (":" in re_result.group(7)) else ("%Z"))
-				var_return = timegm(time.strptime("{0:d}, {1} {2} {3} {4}:{5}:{6} {7}".format(wday, re_result.group(2), mon, re_result.group(4), re_result.group(5), re_result.group(6), re_result.group(7), re_result.group(8)), "%w, %d %m %y %H:%M:%S " + timezone_format))
+				_return = timegm(time.strptime("{0:d}, {1} {2} {3} {4}:{5}:{6} {7}".format(wday, re_result.group(2), mon, re_result.group(4), re_result.group(5), re_result.group(6), re_result.group(7), re_result.group(8)), "%w, %d %m %y %H:%M:%S " + timezone_format))
 			#
 		#
 
-		if (var_return == None): # ANSI C
+		if (_return == None): # ANSI C
 		#
-			try: var_return = timegm(time.strptime(datetime))
+			try: _return = timegm(time.strptime(datetime))
 			except: pass
 		#
 
-		if (var_return == None): raise ValueError("Given date and time is not RFC 2616 compliant formatted", 38)
-		return var_return
+		if (_return == None): raise ValueError("Given date and time is not RFC 2616 compliant formatted", 38)
+		return _return
 	#
 #
 

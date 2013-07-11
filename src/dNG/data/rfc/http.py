@@ -136,10 +136,10 @@ Connection timeout in seconds
 		"""
 
 		if (str != _PY_UNICODE_TYPE and type(url) == _PY_UNICODE_TYPE): url = _PY_STR(url, "utf-8")
-		self.configure(url)
+		self._configure(url)
 	#
 
-	def build_request_parameters(self, params = None, separator = ";"):
+	def _build_request_parameters(self, params = None, separator = ";"):
 	#
 		"""
 Build a HTTP query string based on the given parameters and the separator.
@@ -147,12 +147,11 @@ Build a HTTP query string based on the given parameters and the separator.
 :param params: Query parameters as dict
 :param separator: Query parameter separator
 
-:access: protected
 :return: (mixed) Response data; Exception on error
 :since:  v0.1.00
 		"""
 
-		var_return = None
+		_return = None
 
 		if (type(params) == dict):
 		#
@@ -165,21 +164,20 @@ Build a HTTP query string based on the given parameters and the separator.
 				else: params_list.append("{0}=0".format(quote(str(key))))
 			#
 
-			var_return = separator.join(params_list)
+			_return = separator.join(params_list)
 		#
 
-		return var_return
+		return _return
 	#
 
-	def configure(self, url):
+	def _configure(self, url):
 	#
 		"""
 Returns a connection to the HTTP server.
 
 :param url: URL to be called
 
-:access: protected
-:since:  v0.1.00
+:since: v0.1.00
 		"""
 
 		url_elements = urlsplit(url)
@@ -192,12 +190,11 @@ Returns a connection to the HTTP server.
 		if (url_elements.query != ""): self.path = "{0}?{1}".format(self.path, url_elements.query)
 	#
 
-	def get_connection(self):
+	def _get_connection(self):
 	#
 		"""
 Returns a connection to the HTTP server.
 
-:access: protected
 :return: (mixed) Response data; Exception on error
 :since:  v0.1.00
 		"""
@@ -265,19 +262,19 @@ Call a given request method on the connected HTTP server.
 			#
 			elif (self.headers != None): kwargs['headers'] = self.headers
 
-			connection = self.get_connection()
+			connection = self._get_connection()
 			connection.request(method, **kwargs)
 			response = connection.getresponse()
 
-			var_return = { "headers": { } }
-			for header in response.getheaders(): var_return['headers'][header[0].lower().replace("-", "_")] = header[1]
+			_return = { "headers": { } }
+			for header in response.getheaders(): _return['headers'][header[0].lower().replace("-", "_")] = header[1]
 
-			if (response.status == http_client.CREATED or response.status == http_client.OK or response.status == http_client.PARTIAL_CONTENT): var_return['body'] = response.read()
-			else: var_return['body'] = http_client.HTTPException("{0} {1}".format(str(response.status), str(response.reason)), response.status)
+			if (response.status == http_client.CREATED or response.status == http_client.OK or response.status == http_client.PARTIAL_CONTENT): _return['body'] = response.read()
+			else: _return['body'] = http_client.HTTPException("{0} {1}".format(str(response.status), str(response.reason)), response.status)
 		#
-		except Exception as handled_exception: var_return = { "headers": None, "body": handled_exception }
+		except Exception as handled_exception: _return = { "headers": None, "body": handled_exception }
 
-		return var_return
+		return _return
 	#
 
 	def request_get(self, params = None, separator = ";"):
@@ -292,7 +289,7 @@ Do a GET request on the connected HTTP server.
 :since:  v0.1.00
 		"""
 
-		params = self.build_request_parameters(params, separator)
+		params = self._build_request_parameters(params, separator)
 		return self.request("GET", separator, params)
 	#
 
@@ -308,7 +305,7 @@ Do a HEAD request on the connected HTTP server.
 :since:  v0.1.00
 		"""
 
-		params = self.build_request_parameters(params, separator)
+		params = self._build_request_parameters(params, separator)
 		return self.request("HEAD", separator, params)
 	#
 
@@ -325,7 +322,7 @@ Do a POST request on the connected HTTP server.
 :since:  v0.1.00
 		"""
 
-		params = self.build_request_parameters(params, separator)
+		params = self._build_request_parameters(params, separator)
 		return self.request("POST", separator, params, data)
 	#
 
@@ -396,15 +393,15 @@ Returns a RFC 2616 compliant dict of headers from the entire message.
 		"""
 
 		header = data.split("\r\n\r\n", 1)[0]
-		var_return = Basics.get_headers(header)
+		_return = Basics.get_headers(header)
 
-		if (var_return != False and "@nameless" in var_return and "\n" not in var_return['@nameless']):
+		if (_return != False and "@nameless" in _return and "\n" not in _return['@nameless']):
 		#
-			var_return['@http'] = var_return['@nameless']
-			del(var_return['@nameless'])
+			_return['@http'] = _return['@nameless']
+			del(_return['@nameless'])
 		#
 
-		return var_return
+		return _return
 	#
 
 	@staticmethod
@@ -421,7 +418,7 @@ Returns a RFC 2616 compliant list of fields from a header message.
 :since:  v0.1.00
 		"""
 
-		var_return = [ ]
+		_return = [ ]
 
 		fields = [ ]
 		last_position = 0
@@ -437,7 +434,7 @@ Returns a RFC 2616 compliant list of fields from a header message.
 
 			if (quotation_mark_position > -1 and (next_position < 0 or next_position > quotation_mark_position)):
 			#
-				next_position = Http.header_field_list_find_end_position(field_list[last_position:], quotation_mark_position - last_position, '"')
+				next_position = Http._header_field_list_find_end_position(field_list[last_position:], quotation_mark_position - last_position, '"')
 				if (next_position > -1): next_position += last_position
 			#
 
@@ -463,14 +460,14 @@ Returns a RFC 2616 compliant list of fields from a header message.
 			#
 			else: field = field.strip()
 
-			var_return.append(field)
+			_return.append(field)
 		#
 
-		return var_return
+		return _return
 	#
 
 	@staticmethod
-	def header_field_list_find_end_position(data, position, end_char):
+	def _header_field_list_find_end_position(data, position, end_char):
 	#
 		"""
 Find the position of the given character.
@@ -479,14 +476,13 @@ Find the position of the given character.
 :param position: Position offset
 :param end_char: Character
 
-:access: protected
 :return: (str) List containing str or dict if a field name was identified;
          False on error
 :since:  v0.1.00
 		"""
 
 		next_position = position
-		var_return = -1
+		_return = -1
 
 		while (end_char != None):
 		#
@@ -496,14 +492,13 @@ Find the position of the given character.
 			if (next_position < 1): end_char = None
 			elif (re_result == None or (len(re_result.group(1)) % 2) == 0):
 			#
-				var_return = 1 + next_position
+				_return = 1 + next_position
 				end_char = None
 			#
 		#
 
-		return var_return
+		return _return
 	#
-#
 #
 
 ##j## EOF
