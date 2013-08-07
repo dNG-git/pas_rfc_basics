@@ -66,7 +66,7 @@ HTTP support is provided for requesting and parsing data.
 :copyright: (C) direct Netware Group - All rights reserved
 :package:   rfc_basics.py
 :since:     v0.1.00
-:license:   http://www.direct-netware.de/redirect.php?licenses;mpl2
+:license:   http://www.direct-netware.de/redirect.py?licenses;mpl2
             Mozilla Public License, v. 2.0
 	"""
 
