@@ -118,10 +118,6 @@ Request host
 		"""
 IPv6 link local interface to be used for outgoing requests
 		"""
-		self.length = -1
-		"""
-Request body length
-		"""
 		self.path = None
 		"""
 Request path
@@ -181,9 +177,9 @@ Returns a connection to the HTTP server.
 		"""
 
 		url_elements = urlsplit(url)
-		if (url_elements.username != None): self.auth_username = url_elements.username
-		if (url_elements.password != None): self.auth_password = url_elements.password
-		if (url_elements.hostname != None): self.host = ("[{0}]".format(url_elements.hostname) if (":" in url_elements.hostname) else url_elements.hostname)
+		self.auth_username = (None if (url_elements.username == None) else url_elements.username)
+		self.auth_password = (None if (url_elements.password == None) else url_elements.password)
+		self.host = ("[{0}]".format(url_elements.hostname) if (":" in url_elements.hostname) else url_elements.hostname)
 		self.port = (http_client.HTTP_PORT if (url_elements.port == None) else url_elements.port)
 
 		self.path = url_elements.path
@@ -378,6 +374,20 @@ addresses.
 		"""
 
 		self.ipv6_link_local_interface = interface
+	#
+
+	def set_url(self, url):
+	#
+		"""
+Sets a new URL for all subsequent requests.
+
+:param url: URL to be called
+
+:since: v0.1.00
+		"""
+
+		if (str != _PY_UNICODE_TYPE and type(url) == _PY_UNICODE_TYPE): url = _PY_STR(url, "utf-8")
+		self._configure(url)
 	#
 
 	@staticmethod
