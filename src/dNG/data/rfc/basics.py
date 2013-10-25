@@ -36,7 +36,7 @@ try:
 	_PY_STR = unicode.encode
 	_PY_UNICODE_TYPE = unicode
 #
-except:
+except NameError:
 #
 	_PY_STR = bytes.decode
 	_PY_UNICODE_TYPE = str
@@ -292,7 +292,7 @@ Returns the UNIX timestamp for a RFC 2616 compliant date and time.
 		_return = None
 
 		try: _return = Basics.get_rfc1123_timestamp(datetime)
-		except: pass
+		except Exception: pass
 
 		if (_return == None): # RFC 850
 		#
@@ -314,7 +314,7 @@ Returns the UNIX timestamp for a RFC 2616 compliant date and time.
 		if (_return == None): # ANSI C
 		#
 			try: _return = timegm(time.strptime(datetime))
-			except: pass
+			except Exception: pass
 		#
 
 		if (_return == None): raise ValueError("Given date and time is not RFC 2616 compliant formatted", 38)

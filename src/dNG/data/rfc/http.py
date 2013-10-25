@@ -48,7 +48,7 @@ try:
 	_PY_UNICODE = str.decode
 	_PY_UNICODE_TYPE = unicode
 #
-except:
+except NameError:
 #
 	_PY_BYTES = str.encode
 	_PY_BYTES_TYPE = bytes
@@ -320,6 +320,17 @@ Do a POST request on the connected HTTP server.
 
 		params = self._build_request_parameters(params, separator)
 		return self.request("POST", separator, params, data)
+	#
+
+	def reset_headers(self):
+	#
+		"""
+Resets previously set headers.
+
+:since: v0.1.00
+		"""
+
+		self.headers = { }
 	#
 
 	def set_header(self, name, value, value_append = False):
