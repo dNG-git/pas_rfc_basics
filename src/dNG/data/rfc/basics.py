@@ -124,11 +124,32 @@ Parses a string of headers.
 	#
 
 	@staticmethod
+	def get_iso8601_datetime(timestamp, date = True, _time = True):
+	#
+		"""
+Returns the ISO-8601 compliant date and time for an UNIX timestamp. Please
+note that timezone names can only be handled if pytz is available.
+
+:param timestamp: UNIX timestamp
+
+:return: (str) ISO-8601 compliant date and / or time
+:since:  v0.1.00
+		"""
+
+		time_struct = time.gmtime(timestamp)
+
+		_return = (time.strftime("%Y-%m-%d", time_struct) if (date) else "")
+		if (_time): _return += time.strftime(("T%H:%M:%S" if (date) else "%H:%M:%S"), time_struct)
+
+		return _return
+	#
+
+	@staticmethod
 	def get_iso8601_timestamp(value, date = True, has_time = True, has_timezone = True, current_day = True):
 	#
 		"""
-Returns the UNIX timestamp for a ISO-8601 compliant date and time. Please note
-that timezone names can only be handled if pytz is available.
+Returns the UNIX timestamp for a ISO-8601 compliant date and time. Please
+note that timezone names can only be handled if pytz is available.
 
 :param value: ISO-8601 compliant date and / or time
 
