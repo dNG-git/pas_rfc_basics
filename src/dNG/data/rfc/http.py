@@ -23,6 +23,8 @@ http://www.direct-netware.de/redirect.py?licenses;mpl2
 ----------------------------------------------------------------------------
 NOTE_END //n"""
 
+# pylint: disable=import-error,invalid-name,no-name-in-module
+
 from base64 import b64encode
 import re
 
@@ -87,7 +89,7 @@ Constructor __init__(Http)
 :since: v0.1.00
 		"""
 
-		global _PY_STR, _PY_UNICODE_TYPE
+		# global: _PY_STR, _PY_UNICODE_TYPE
 
 		self.auth_username = None
 		"""
@@ -225,7 +227,9 @@ Call a given request method on the connected HTTP server.
 :since:  v0.1.00
 		"""
 
-		global _PY_BYTES, _PY_BYTES_TYPE, _PY_STR, _PY_UNICODE
+		# global: _PY_BYTES, _PY_BYTES_TYPE, _PY_STR, _PY_UNICODE
+		# pylint: disable=broad-except,star-args
+
 		if (self.event_handler != None): self.event_handler.debug("#echo(__FILEPATH__)# -http.request({0}, separator, params, data)- (#echo(__LINE__)#)".format(method))
 
 		try:

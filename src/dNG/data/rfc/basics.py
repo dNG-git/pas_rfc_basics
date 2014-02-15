@@ -23,6 +23,8 @@ http://www.direct-netware.de/redirect.py?licenses;mpl2
 ----------------------------------------------------------------------------
 NOTE_END //n"""
 
+# pylint: disable=import-error,invalid-name
+
 from calendar import timegm
 from datetime import datetime
 import re
@@ -84,7 +86,8 @@ Parses a string of headers.
 :since:  v0.1.00
 		"""
 
-		global _PY_STR, _PY_UNICODE_TYPE
+		# global: _PY_STR, _PY_UNICODE_TYPE
+
 		_return = False
 
 		if (str != _PY_UNICODE_TYPE and type(data) == _PY_UNICODE_TYPE): data = _PY_STR(data, "utf-8")
@@ -274,18 +277,18 @@ Returns a RFC 1123 compliant date and time.
 	#
 
 	@staticmethod
-	def get_rfc1123_timestamp(datetime):
+	def get_rfc1123_timestamp(_datetime):
 	#
 		"""
 Returns the UNIX timestamp for a RFC 1123 compliant date and time.
 
-:param datetime: RFC 1123 compliant date and time
+:param _datetime: RFC 1123 compliant date and time
 
 :return: (int) UNIX timestamp
 :since:  v0.1.00
 		"""
 
-		re_result = re.match("(\\w{3}), (\\d{1,2}) (\\w{3}) (\\d{2,4}) (\\d{1,2}):(\\d{1,2}):(\\d{1,2}) (\\w{3}|[+\\-]\\d{1,2}:\\d{1,2})$", datetime)
+		re_result = re.match("(\\w{3}), (\\d{1,2}) (\\w{3}) (\\d{2,4}) (\\d{1,2}):(\\d{1,2}):(\\d{1,2}) (\\w{3}|[+\\-]\\d{1,2}:\\d{1,2})$", _datetime)
 		if (re_result == None): raise ValueError("Given date and time is not RFC 1123 compliant formatted")
 
 		wday = Basics.RFC1123_DAYS.index(re_result.group(1))
@@ -298,25 +301,27 @@ Returns the UNIX timestamp for a RFC 1123 compliant date and time.
 	#
 
 	@staticmethod
-	def get_rfc2616_timestamp(datetime):
+	def get_rfc2616_timestamp(_datetime):
 	#
 		"""
 Returns the UNIX timestamp for a RFC 2616 compliant date and time.
 
-:param datetime: RFC 2616 compliant date and time
+:param _datetime: RFC 2616 compliant date and time
 
 :return: (int) UNIX timestamp
 :since:  v0.1.00
 		"""
 
+		# pylint: disable=broad-except
+
 		_return = None
 
-		try: _return = Basics.get_rfc1123_timestamp(datetime)
+		try: _return = Basics.get_rfc1123_timestamp(_datetime)
 		except Exception: pass
 
 		if (_return == None): # RFC 850
 		#
-			re_result = re.match("(\\w{6,9}), (\\d{1,2})-(\\w{3})-(\\d{2}) (\\d{1,2}):(\\d{1,2}):(\\d{1,2}) (\\w{3}|[+\\-]\\d{1,2}:\\d{1,2})$", datetime)
+			re_result = re.match("(\\w{6,9}), (\\d{1,2})-(\\w{3})-(\\d{2}) (\\d{1,2}):(\\d{1,2}):(\\d{1,2}) (\\w{3}|[+\\-]\\d{1,2}:\\d{1,2})$", _datetime)
 
 			if (re_result != None):
 			#
@@ -332,7 +337,7 @@ Returns the UNIX timestamp for a RFC 2616 compliant date and time.
 
 		if (_return == None): # ANSI C
 		#
-			try: _return = timegm(time.strptime(datetime))
+			try: _return = timegm(time.strptime(_datetime))
 			except Exception: pass
 		#
 
