@@ -6,9 +6,6 @@ RFC Basics for Python
 """
 """n// NOTE
 ----------------------------------------------------------------------------
-direct PAS
-Python Application Services
-----------------------------------------------------------------------------
 (C) direct Netware Group - All rights reserved
 http://www.direct-netware.de/redirect.py?py;rfc_basics
 
