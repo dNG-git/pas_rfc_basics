@@ -410,14 +410,14 @@ Returns a RFC 2616 compliant dict of headers from the entire message.
 
 :param data: Input message
 
-:return: (str) Dict with parsed headers; False on error
+:return: (str) Dict with parsed headers; None on error
 :since:  v0.1.00
 		"""
 
 		header = data.split("\r\n\r\n", 1)[0]
 		_return = Basics.get_headers(header)
 
-		if (_return != False and "@nameless" in _return and "\n" not in _return['@nameless']):
+		if (_return != None and "@nameless" in _return and "\n" not in _return['@nameless']):
 		#
 			_return['@http'] = _return['@nameless']
 			del(_return['@nameless'])

@@ -79,13 +79,13 @@ Parses a string of headers.
 
 :param data: String of headers
 
-:return: (dict) Dict with parsed headers; False on error
+:return: (dict) Dict with parsed headers; None on error
 :since:  v0.1.00
 		"""
 
 		# global: _PY_STR, _PY_UNICODE_TYPE
 
-		_return = False
+		_return = None
 
 		if (str != _PY_UNICODE_TYPE and type(data) == _PY_UNICODE_TYPE): data = _PY_STR(data, "utf-8")
 
