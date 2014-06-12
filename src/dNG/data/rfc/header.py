@@ -27,7 +27,7 @@ from .basics import Basics
 class Header(Basics):
 #
 	"""
-Parses RFC 2616 compliant headers.
+Parses RFC 7231 compliant headers.
 
 :author:    direct Netware Group
 :copyright: (C) direct Netware Group - All rights reserved
@@ -80,7 +80,7 @@ Find the position of the given character.
 	def get_field_list_dict(field_list, separator = ",", field_separator = ":"):
 	#
 		"""
-Returns a RFC 2616 compliant list of fields from a header message.
+Returns a RFC 7231 compliant list of fields from a header message.
 
 :param field: Header field list
 :param separator: Separator between fields

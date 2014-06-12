@@ -60,15 +60,15 @@ Regular expression to find folded lines
 	"""
 	RFC850_DAYS = [ "Monday", "Tuesday", "Wednesday‎", "Thursday‎", "Friday", "Saturday‎", "Sunday" ]
 	"""
-RFC 1123 day names
+RFC 5322 day names
 	"""
-	RFC1123_DAYS = [ "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" ]
+	RFC5322_DAYS = [ "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" ]
 	"""
-RFC 1123 day names
+RFC 5322 day names
 	"""
-	RFC1123_MONTHS = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ]
+	RFC5322_MONTHS = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ]
 	"""
-RFC 1123 month names
+RFC 5322 month names
 	"""
 
 	@staticmethod
@@ -254,56 +254,85 @@ note that timezone names can only be handled if pytz is available.
 	#
 
 	@staticmethod
-	def get_rfc1123_datetime(timestamp):
+	def get_rfc5322_datetime(timestamp):
 	#
 		"""
-Returns a RFC 1123 compliant date and time.
+Returns a RFC 5322 compliant date and time.
 
 :param timestamp: UNIX timestamp
 
-:return: (str) RFC 1123 compliant date and time
+:return: (str) RFC 5322 compliant date and time
 :since:  v0.1.00
 		"""
 
 		time_struct = time.gmtime(timestamp)
 		_return = time.strftime("%%a, %d %%b %Y %H:%M:%S GMT", time_struct)
-		_return = _return.replace("%a", Basics.RFC1123_DAYS[time_struct.tm_wday], 1)
-		_return = _return.replace("%b", Basics.RFC1123_MONTHS[time_struct.tm_mon - 1], 1)
+		_return = _return.replace("%a", Basics.RFC5322_DAYS[time_struct.tm_wday], 1)
+		_return = _return.replace("%b", Basics.RFC5322_MONTHS[time_struct.tm_mon - 1], 1)
 
 		return _return
 	#
 
 	@staticmethod
-	def get_rfc1123_timestamp(_datetime):
+	def get_rfc5322_timestamp(_datetime):
 	#
 		"""
-Returns the UNIX timestamp for a RFC 1123 compliant date and time.
+Returns the UNIX timestamp for a RFC 5322 compliant date and time.
 
-:param _datetime: RFC 1123 compliant date and time
+:param _datetime: RFC 5322 compliant date and time
 
 :return: (int) UNIX timestamp
 :since:  v0.1.00
 		"""
 
-		re_result = re.match("(\\w{3}), (\\d{1,2}) (\\w{3}) (\\d{2,4}) (\\d{1,2}):(\\d{1,2}):(\\d{1,2}) (\\w{3}|[+\\-]\\d{1,2}:\\d{1,2})$", _datetime)
-		if (re_result == None): raise ValueError("Given date and time is not RFC 1123 compliant formatted")
+		re_result = re.match("(\\w{3}, )*(\\d{1,2}) (\\w{3}) (\\d{2,4}) (\\d{1,2}):(\\d{1,2}):(\\d{1,2}) (\\w{3}|[+\\-]\\d{1,2}:\\d{1,2})$", _datetime)
+		if (re_result == None): raise ValueError("Given date and time is not RFC 5322 compliant formatted")
 
-		wday = Basics.RFC1123_DAYS.index(re_result.group(1))
-		wday = (0 if (wday > 5) else 1 + wday)
-
-		mon = 1 + Basics.RFC1123_MONTHS.index(re_result.group(3))
+		mon = 1 + Basics.RFC5322_MONTHS.index(re_result.group(3))
 
 		timezone_format = ("%z" if (":" in re_result.group(7)) else ("%Z"))
-		return timegm(time.strptime("{0:d}, {1} {2:0=2d} {3} {4}:{5}:{6} {7}".format(wday, re_result.group(2), mon, re_result.group(4), re_result.group(5), re_result.group(6), re_result.group(7), re_result.group(8)), "%w, %d %m %Y %H:%M:%S " + timezone_format))
+
+		if (re_result.group(1) == None):
+		#
+			time_struct = time.strptime("{0} {1:0=2d} {2} {3}:{4}:{5} {6}".format(re_result.group(2),
+			                                                                      mon,
+			                                                                      re_result.group(4),
+			                                                                      re_result.group(5),
+			                                                                      re_result.group(6),
+			                                                                      re_result.group(7),
+			                                                                      re_result.group(8)
+			                                                                     ),
+			                            "%d %m %Y %H:%M:%S " + timezone_format
+			                           )
+		#
+		else:
+		#
+			wday = Basics.RFC5322_DAYS.index(re_result.group(1)[:-2])
+			wday = (0 if (wday > 5) else 1 + wday)
+
+			time_struct = time.strptime("{0}, {1} {2:0=2d} {3} {4}:{5}:{6} {7}".format(wday,
+			                                                                           re_result.group(2),
+			                                                                           mon,
+			                                                                           re_result.group(4),
+			                                                                           re_result.group(5),
+			                                                                           re_result.group(6),
+			                                                                           re_result.group(7),
+			                                                                           re_result.group(8)
+			                                                                          ),
+			                            "%w, %d %m %Y %H:%M:%S " + timezone_format
+			                           )
+		#
+
+		return timegm(time_struct)
 	#
 
 	@staticmethod
-	def get_rfc2616_timestamp(_datetime):
+	def get_rfc7231_timestamp(_datetime):
 	#
 		"""
-Returns the UNIX timestamp for a RFC 2616 compliant date and time.
+Returns the UNIX timestamp for a RFC 7231 compliant date and time.
 
-:param _datetime: RFC 2616 compliant date and time
+:param _datetime: RFC 7231 compliant date and time
 
 :return: (int) UNIX timestamp
 :since:  v0.1.00
@@ -313,7 +342,7 @@ Returns the UNIX timestamp for a RFC 2616 compliant date and time.
 
 		_return = None
 
-		try: _return = Basics.get_rfc1123_timestamp(_datetime)
+		try: _return = Basics.get_rfc5322_timestamp(_datetime)
 		except Exception: pass
 
 		if (_return == None): # RFC 850
@@ -325,7 +354,7 @@ Returns the UNIX timestamp for a RFC 2616 compliant date and time.
 				wday = Basics.RFC850_DAYS.index(re_result.group(1))
 				wday = (0 if (wday > 5) else 1 + wday)
 
-				mon = 1 + Basics.RFC1123_MONTHS.index(re_result.group(3))
+				mon = 1 + Basics.RFC5322_MONTHS.index(re_result.group(3))
 
 				timezone_format = ("%z" if (":" in re_result.group(7)) else ("%Z"))
 				_return = timegm(time.strptime("{0:d}, {1} {2:0=2d} {3} {4}:{5}:{6} {7}".format(wday, re_result.group(2), mon, re_result.group(4), re_result.group(5), re_result.group(6), re_result.group(7), re_result.group(8)), "%w, %d %m %y %H:%M:%S " + timezone_format))
@@ -338,7 +367,7 @@ Returns the UNIX timestamp for a RFC 2616 compliant date and time.
 			except Exception: pass
 		#
 
-		if (_return == None): raise ValueError("Given date and time is not RFC 2616 compliant formatted")
+		if (_return == None): raise ValueError("Given date and time is not RFC 7231 compliant formatted")
 		return _return
 	#
 #
