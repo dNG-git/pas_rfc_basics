@@ -2,9 +2,8 @@
 ##j## BOF
 
 """
-RFC Basics for Python
-"""
-"""n// NOTE
+RFC basics for Python
+Easy to use and RFC compliant methods
 ----------------------------------------------------------------------------
 (C) direct Netware Group - All rights reserved
 http://www.direct-netware.de/redirect.py?py;rfc_basics
@@ -17,8 +16,7 @@ http://www.direct-netware.de/redirect.py?licenses;mpl2
 ----------------------------------------------------------------------------
 #echo(rfcBasicsVersion)#
 #echo(__FILEPATH__)#
-----------------------------------------------------------------------------
-NOTE_END //n"""
+"""
 
 # pylint: disable=import-error,invalid-name
 

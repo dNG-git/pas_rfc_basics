@@ -1,5 +1,6 @@
 ----------------------------------------------------------------------------
-RFC Basics for Python
+RFC basics for Python
+Easy to use and RFC compliant methods
 ----------------------------------------------------------------------------
 
 RFC Basics is a Python module intended to implement missing RFC standards

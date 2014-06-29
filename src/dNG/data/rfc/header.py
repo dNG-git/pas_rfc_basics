@@ -2,9 +2,8 @@
 ##j## BOF
 
 """
-RFC Basics for Python
-"""
-"""n// NOTE
+RFC basics for Python
+Easy to use and RFC compliant methods
 ----------------------------------------------------------------------------
 (C) direct Netware Group - All rights reserved
 http://www.direct-netware.de/redirect.py?py;rfc_basics
@@ -17,8 +16,7 @@ http://www.direct-netware.de/redirect.py?licenses;mpl2
 ----------------------------------------------------------------------------
 #echo(rfcBasicsVersion)#
 #echo(__FILEPATH__)#
-----------------------------------------------------------------------------
-NOTE_END //n"""
+"""
 
 import re
 
@@ -84,7 +82,7 @@ Returns a RFC 7231 compliant list of fields from a header message.
 
 :param field: Header field list
 :param separator: Separator between fields
-:param field_separator: Separator between key-value pairs
+:param field_separator: Separator between key-value pairs; None to not parse it
 
 :return: (list) List containing str or dict if a field name was identified
 :since:  v0.1.00
@@ -125,7 +123,7 @@ Returns a RFC 7231 compliant list of fields from a header message.
 
 		for field in fields:
 		#
-			if (field_separator in field):
+			if (field_separator != None and field_separator in field):
 			#
 				field = field.split(field_separator, 1)
 				field = { "key": field[0].strip(), "value": field[1].strip() }
