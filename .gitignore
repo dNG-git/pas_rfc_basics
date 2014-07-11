@@ -1,7 +1,7 @@
-_extras
 __py*
 .*
 *.pyc
-make*.py*
 nbproject
-rfc_basics.*
+/_extras
+/make*.py*
+/rfc_basics.*
