@@ -63,11 +63,11 @@ Find the position of the given character.
 			next_position = data.find(end_char, 1 + next_position)
 			re_result = (None if (next_position < 1) else Header.RE_HEADER_FIELD_ESCAPED.search(data[position:next_position]))
 
-			if (next_position < 1): end_char = None
+			if (next_position < 1): break
 			elif (re_result == None or (len(re_result.group(1)) % 2) == 0):
 			#
 				_return = 1 + next_position
-				end_char = None
+				break
 			#
 		#
 
@@ -94,7 +94,7 @@ Returns a RFC 7231 compliant list of fields from a header message.
 		last_position = 0
 		field_list_length = (len(field_list) if (type(field_list) == str) else 0)
 
-		while (last_position > -1 and last_position < field_list_length):
+		while (last_position < field_list_length):
 		#
 			separator_position = field_list.find(separator, last_position)
 			quotation_mark_position = field_list.find('"', last_position)
@@ -111,7 +111,7 @@ Returns a RFC 7231 compliant list of fields from a header message.
 			if (next_position < 0):
 			#
 				fields.append(field_list[last_position:])
-				last_position = -1
+				break
 			#
 			else:
 			#
