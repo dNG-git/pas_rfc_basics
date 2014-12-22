@@ -242,7 +242,7 @@ note that timezone names can only be handled if pytz is available.
 					timezone_value = timezone_value.split(":", 1)
 					timezone_offset = (-3600 * int(timezone_value[0])) + (60 * int(timezone_value[1]))
 				#
-				elif (timezone == None): raise RuntimeError("Timezone names are only available if pytz is available")
+				elif (timezone is None): raise RuntimeError("Timezone names are only available if pytz is available")
 				else: timezone_offset = -1 * timezone(timezone_value).utcoffset(_datetime).total_seconds()
 			#
 		#
@@ -284,13 +284,13 @@ Returns the UNIX timestamp for a RFC 5322 compliant date and time.
 		"""
 
 		re_result = re.match("(\\w{3}, )*(\\d{1,2}) (\\w{3}) (\\d{2,4}) (\\d{1,2}):(\\d{1,2}):(\\d{1,2}) (\\w{3}|[+\\-]\\d{1,2}:\\d{1,2})$", _datetime)
-		if (re_result == None): raise ValueError("Given date and time is not RFC 5322 compliant formatted")
+		if (re_result is None): raise ValueError("Given date and time is not RFC 5322 compliant formatted")
 
 		mon = 1 + Basics.RFC5322_MONTHS.index(re_result.group(3))
 
 		timezone_format = ("%z" if (":" in re_result.group(7)) else ("%Z"))
 
-		if (re_result.group(1) == None):
+		if (re_result.group(1) is None):
 		#
 			time_struct = time.strptime("{0} {1:0=2d} {2} {3}:{4}:{5} {6}".format(re_result.group(2),
 			                                                                      mon,
@@ -343,7 +343,7 @@ Returns the UNIX timestamp for a RFC 7231 compliant date and time.
 		try: _return = Basics.get_rfc5322_timestamp(_datetime)
 		except Exception: pass
 
-		if (_return == None): # RFC 850
+		if (_return is None): # RFC 850
 		#
 			re_result = re.match("(\\w{6,9}), (\\d{1,2})-(\\w{3})-(\\d{2}) (\\d{1,2}):(\\d{1,2}):(\\d{1,2}) (\\w{3}|[+\\-]\\d{1,2}:\\d{1,2})$", _datetime)
 
@@ -359,13 +359,13 @@ Returns the UNIX timestamp for a RFC 7231 compliant date and time.
 			#
 		#
 
-		if (_return == None): # ANSI C
+		if (_return is None): # ANSI C
 		#
 			try: _return = timegm(time.strptime(_datetime))
 			except Exception: pass
 		#
 
-		if (_return == None): raise ValueError("Given date and time is not RFC 7231 compliant formatted")
+		if (_return is None): raise ValueError("Given date and time is not RFC 7231 compliant formatted")
 		return _return
 	#
 #

@@ -64,7 +64,7 @@ Find the position of the given character.
 			re_result = (None if (next_position < 1) else Header.RE_HEADER_FIELD_ESCAPED.search(data[position:next_position]))
 
 			if (next_position < 1): break
-			elif (re_result == None or (len(re_result.group(1)) % 2) == 0):
+			elif (re_result is None or (len(re_result.group(1)) % 2) == 0):
 			#
 				_return = 1 + next_position
 				break
