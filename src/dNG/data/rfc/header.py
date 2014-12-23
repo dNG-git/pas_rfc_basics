@@ -58,7 +58,7 @@ Find the position of the given character.
 		next_position = position
 		_return = -1
 
-		while (end_char != None):
+		while (end_char is not None):
 		#
 			next_position = data.find(end_char, 1 + next_position)
 			re_result = (None if (next_position < 1) else Header.RE_HEADER_FIELD_ESCAPED.search(data[position:next_position]))
@@ -123,7 +123,7 @@ Returns a RFC 7231 compliant list of fields from a header message.
 
 		for field in fields:
 		#
-			if (field_separator != None and field_separator in field):
+			if (field_separator is not None and field_separator in field):
 			#
 				field = field.split(field_separator, 1)
 				field = { "key": field[0].strip(), "value": field[1].strip() }

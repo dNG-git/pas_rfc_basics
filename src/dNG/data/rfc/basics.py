@@ -347,7 +347,7 @@ Returns the UNIX timestamp for a RFC 7231 compliant date and time.
 		#
 			re_result = re.match("(\\w{6,9}), (\\d{1,2})-(\\w{3})-(\\d{2}) (\\d{1,2}):(\\d{1,2}):(\\d{1,2}) (\\w{3}|[+\\-]\\d{1,2}:\\d{1,2})$", _datetime)
 
-			if (re_result != None):
+			if (re_result is not None):
 			#
 				wday = Basics.RFC850_DAYS.index(re_result.group(1))
 				wday = (0 if (wday > 5) else 1 + wday)
