@@ -85,9 +85,9 @@ Parses a string of headers.
 
 		_return = None
 
-		if (str != _PY_UNICODE_TYPE and type(data) == _PY_UNICODE_TYPE): data = _PY_STR(data, "utf-8")
+		if (str is not _PY_UNICODE_TYPE and type(data) is _PY_UNICODE_TYPE): data = _PY_STR(data, "utf-8")
 
-		if (type(data) == str and len(data) > 0):
+		if (isinstance(data, str) and len(data) > 0):
 		#
 			data = Basics.RE_HEADER_FOLDED_LINE.sub("\\2\\4\\6", data)
 			_return = { }
@@ -105,7 +105,7 @@ Parses a string of headers.
 
 					if (header_name in _return):
 					#
-						if (type(_return[header_name]) == list): _return[header_name].append(header[1])
+						if (type(_return[header_name]) is list): _return[header_name].append(header[1])
 						else: _return[header_name] = [ _return[header_name], header[1] ]
 					#
 					else: _return[header_name] = header[1]

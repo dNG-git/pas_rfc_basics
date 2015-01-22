@@ -92,7 +92,7 @@ Returns a RFC 7231 compliant list of fields from a header message.
 
 		fields = [ ]
 		last_position = 0
-		field_list_length = (len(field_list) if (type(field_list) == str) else 0)
+		field_list_length = (len(field_list) if (isinstance(field_list, str)) else 0)
 
 		while (last_position < field_list_length):
 		#
