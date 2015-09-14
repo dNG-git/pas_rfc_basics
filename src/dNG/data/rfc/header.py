@@ -102,11 +102,9 @@ Returns a RFC 7231 compliant list of fields from a header message.
 
 			if (separator_position > -1): next_position = separator_position
 
-			if (quotation_mark_position > -1 and (next_position < 0 or next_position > quotation_mark_position)):
-			#
-				next_position = Header._find_field_list_end_position(field_list[last_position:], quotation_mark_position - last_position, '"')
-				if (next_position > -1): next_position += last_position
-			#
+			if (quotation_mark_position > -1
+			    and (next_position < 0 or next_position > quotation_mark_position)
+			   ): next_position = Header._find_field_list_end_position(field_list, quotation_mark_position, '"')
 
 			if (next_position < 0):
 			#
@@ -126,7 +124,14 @@ Returns a RFC 7231 compliant list of fields from a header message.
 			if (field_separator is not None and field_separator in field):
 			#
 				field = field.split(field_separator, 1)
-				field = { "key": field[0].strip(), "value": field[1].strip() }
+				field_value = field[1]
+
+				field_value = (field_value[1:-1]
+				               if (field_value[:1] == '"' and field_value[-1:] == '"') else
+				               field_value.strip()
+				              )
+
+				field = { "key": field[0].strip(), "value": field_value }
 			#
 			else: field = field.strip()
 
