@@ -48,10 +48,12 @@ with TemporaryDirectory(dir = ".") as build_directory:
 	      version = get_version(),
 	      description = "Easy to use and RFC compliant methods",
 	      long_description = """RFC Basics is a Python module intended to implement missing RFC standards used for different purposes.""",
-	      author = "direct Netware Group",
+	      author = "direct Netware Group et al.",
 	      author_email = "web@direct-netware.de",
 	      license = "MPL2",
 	      url = "https://www.direct-netware.de/redirect?py;rfc_basics",
+
+	      platforms = [ "any" ],
 
 	      package_dir = { "": _build_path },
 	      packages = [ "dNG" ],
