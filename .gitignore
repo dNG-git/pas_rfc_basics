@@ -5,4 +5,5 @@ nbproject
 /_extras
 /build
 /make*.py*
-/rfc_basics.*
+/py_rfc_basics.*
+/rfc_basics.py.*
