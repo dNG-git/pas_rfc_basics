@@ -28,7 +28,7 @@ Parses RFC 7231 compliant headers.
 :author:    direct Netware Group
 :copyright: (C) direct Netware Group - All rights reserved
 :package:   rfc_basics.py
-:since:     v0.1.00
+:since:     v0.1.0
 :license:   https://www.direct-netware.de/redirect?licenses;mpl2
             Mozilla Public License, v. 2.0
     """
@@ -49,7 +49,7 @@ Find the position of the given character.
 
 :return: (str) List containing str or dict if a field name was identified;
          False on error
-:since:  v0.1.00
+:since:  v0.1.0
         """
 
         next_position = position
@@ -74,12 +74,12 @@ Find the position of the given character.
         """
 Returns a RFC 7231 compliant list of fields from a header message.
 
-:param field: Header field list
+:param field_list: Header field list
 :param separator: Separator between fields
 :param field_separator: Separator between key-value pairs; None to not parse it
 
 :return: (list) List containing str or dict if a field name was identified
-:since:  v0.1.00
+:since:  v0.1.0
         """
 
         _return = [ ]

@@ -42,7 +42,7 @@ This class provides basic functions described in different RFCs.
 :author:     direct Netware Group
 :copyright:  (C) direct Netware Group - All rights reserved
 :package:    rfc_basics.py
-:since:      v0.1.00
+:since:      v0.1.0
 :license:    https://www.direct-netware.de/redirect?licenses;mpl2
              Mozilla Public License, v. 2.0
     """
@@ -72,7 +72,7 @@ Parses a string of headers.
 :param data: String of headers
 
 :return: (dict) Dict with parsed headers; None on error
-:since:  v0.1.00
+:since:  v0.1.0
         """
 
         # global: _PY_STR, _PY_UNICODE_TYPE
@@ -117,7 +117,7 @@ note that timezone names can only be handled if pytz is available.
 :param timestamp: UNIX timestamp
 
 :return: (str) ISO-8601 compliant date and / or time
-:since:  v0.1.00
+:since:  v0.1.0
         """
 
         time_struct = time.gmtime(timestamp)
@@ -137,7 +137,7 @@ note that timezone names can only be handled if pytz is available.
 :param value: ISO-8601 compliant date and / or time
 
 :return: (int) UNIX timestamp
-:since:  v0.1.00
+:since:  v0.1.0
         """
 
         if (current_day and (not date)):
@@ -229,7 +229,7 @@ Returns a RFC 5322 compliant date and time.
 :param timestamp: UNIX timestamp
 
 :return: (str) RFC 5322 compliant date and time
-:since:  v0.1.00
+:since:  v0.1.0
         """
 
         time_struct = time.gmtime(timestamp)
@@ -248,7 +248,7 @@ Returns the UNIX timestamp for a RFC 5322 compliant date and time.
 :param _datetime: RFC 5322 compliant date and time
 
 :return: (int) UNIX timestamp
-:since:  v0.1.00
+:since:  v0.1.0
         """
 
         re_result = re.match("(\\w{3}, )*(\\d{1,2}) (\\w{3}) (\\d{2,4}) (\\d{1,2}):(\\d{1,2}):(\\d{1,2}) (\\w{3}|[+\\-]\\d{1,2}:\\d{1,2})$", _datetime)
@@ -297,7 +297,7 @@ Returns the UNIX timestamp for a RFC 7231 compliant date and time.
 :param _datetime: RFC 7231 compliant date and time
 
 :return: (int) UNIX timestamp
-:since:  v0.1.00
+:since:  v0.1.0
         """
 
         # pylint: disable=broad-except
