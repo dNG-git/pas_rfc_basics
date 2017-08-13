@@ -16,6 +16,13 @@ https://www.direct-netware.de/redirect?licenses;mpl2
 setup.py
 """
 
+from os import path
+
+from distutils.core import setup
+
+from dNG.distutils.command.build_py import BuildPy
+from dNG.distutils.temporary_directory import TemporaryDirectory
+
 def get_version():
     """
 Returns the version currently in development.
@@ -24,14 +31,8 @@ Returns the version currently in development.
 :since:  v0.1.01
     """
 
-    return "v0.1.02"
+    return "v1.0.0"
 #
-
-from dNG.distutils.command.build_py import BuildPy
-from dNG.distutils.temporary_directory import TemporaryDirectory
-
-from distutils.core import setup
-from os import path
 
 with TemporaryDirectory(dir = ".") as build_directory:
     parameters = { "pyRfcBasicsVersion": get_version() }
@@ -41,7 +42,7 @@ with TemporaryDirectory(dir = ".") as build_directory:
 
     _build_path = path.join(build_directory, "src")
 
-    setup(name = "RFC basics for Python",
+    setup(name = "dng-rfc-basics",
           version = get_version(),
           description = "Easy to use and RFC compliant methods",
           long_description = """RFC Basics is a Python module intended to implement missing RFC standards used for different purposes.""",
@@ -51,6 +52,8 @@ with TemporaryDirectory(dir = ".") as build_directory:
           url = "https://www.direct-netware.de/redirect?py;rfc_basics",
 
           platforms = [ "any" ],
+
+          setup_requires = "dng-builder-suite",
 
           package_dir = { "": _build_path },
           packages = [ "dNG" ],
