@@ -13,7 +13,7 @@ obtain one at http://mozilla.org/MPL/2.0/.
 ----------------------------------------------------------------------------
 https://www.direct-netware.de/redirect?licenses;mpl2
 ----------------------------------------------------------------------------
-#echo(rfcBasicsVersion)#
+#echo(pyRfcBasicsVersion)#
 #echo(__FILEPATH__)#
 """
 
