@@ -91,7 +91,7 @@ Parses a string of headers.
                 header = header_line.split(":", 1)
 
                 if (len(header) == 2):
-                    header_name = header[0].strip().upper()
+                    header_name = header[0].strip().lower()
                     header[1] = header[1].strip()
 
                     if (header_name in _return):
