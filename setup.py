@@ -16,12 +16,21 @@ https://www.direct-netware.de/redirect?licenses;mpl2
 setup.py
 """
 
-from os import path
+from os import makedirs, path
 
-from distutils.core import setup
+try:
+    from setuptools.core import setup
+except ImportError:
+    from distutils.core import setup
+#
 
-from dNG.distutils.command.build_py import BuildPy
-from dNG.distutils.temporary_directory import TemporaryDirectory
+try:
+    from dNG.distutils.command.build_py import BuildPy
+    from dNG.distutils.command.sdist import Sdist
+    from dNG.distutils.temporary_directory import TemporaryDirectory
+except ImportError:
+    raise RuntimeError("'dng-builder-suite' prerequisite not matched")
+#
 
 def get_version():
     """
@@ -40,27 +49,29 @@ with TemporaryDirectory(dir = ".") as build_directory:
     BuildPy.set_build_target_path(build_directory)
     BuildPy.set_build_target_parameters(parameters)
 
-    _build_path = path.join(build_directory, "src")
+    Sdist.set_build_target_path(build_directory)
+    Sdist.set_build_target_parameters(parameters)
 
-    setup(name = "dng-rfc-basics",
-          version = get_version(),
-          description = "Easy to use and RFC compliant methods",
-          long_description = """RFC Basics is a Python module intended to implement missing RFC standards used for different purposes.""",
-          author = "direct Netware Group et al.",
-          author_email = "web@direct-netware.de",
-          license = "MPL2",
-          url = "https://www.direct-netware.de/redirect?py;rfc_basics",
+    makedirs(path.join(build_directory, "src", "dNG"))
 
-          platforms = [ "any" ],
+    _setup = { "name": "dng-rfc-basics",
+               "version": get_version()[1:],
+               "description": "Easy to use and RFC compliant methods",
+               "long_description": """RFC Basics is a Python module intended to implement missing RFC standards used for different purposes.""",
+               "author": "direct Netware Group et al.",
+               "author_email": "web@direct-netware.de",
+               "license": "MPL2",
+               "url": "https://www.direct-netware.de/redirect?py;rfc_basics",
 
-          setup_requires = "dng-builder-suite",
+               "platforms": [ "any" ],
 
-          package_dir = { "": _build_path },
-          packages = [ "dNG" ],
+               "packages": [ "dNG" ],
 
-          data_files = [ ( "docs", [ "LICENSE", "README" ]) ],
+               "data_files": [ ( "docs", [ "LICENSE", "README" ]) ]
+             }
 
-          # Override build_py to first run builder.py over all PAS modules
-          cmdclass = { "build_py": BuildPy }
-         )
+    # Override build_py to first run builder.py
+    _setup['cmdclass'] = { "build_py": BuildPy, "sdist": Sdist }
+
+    setup(**_setup)
 #

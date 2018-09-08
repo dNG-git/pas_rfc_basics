@@ -4,6 +4,9 @@ __py*
 nbproject
 /_extras
 /build
+/dist
+/dng_rfc_basics*
 /make*.py*
-/py_rfc_basics.*
+/MANIFEST
+/py_rfc_basics*
 /rfc_basics.py.*
