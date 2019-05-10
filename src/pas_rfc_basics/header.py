@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 """
-RFC basics for Python
-Easy to use and RFC compliant methods
+direct PAS
+Python Application Services
 ----------------------------------------------------------------------------
 (C) direct Netware Group - All rights reserved
-https://www.direct-netware.de/redirect?py;rfc_basics
+https://www.direct-netware.de/redirect?pas;rfc_basics
 
 This Source Code Form is subject to the terms of the Mozilla Public License,
 v. 2.0. If a copy of the MPL was not distributed with this file, You can
@@ -13,29 +13,34 @@ obtain one at http://mozilla.org/MPL/2.0/.
 ----------------------------------------------------------------------------
 https://www.direct-netware.de/redirect?licenses;mpl2
 ----------------------------------------------------------------------------
-#echo(pyRfcBasicsVersion)#
+#echo(pasRfcBasicsVersion)#
 #echo(__FILEPATH__)#
 """
 
 import re
 
-from .basics import Basics
+from dpt_runtime.binary import Binary
 
-class Header(Basics):
+class Header(object):
     """
 Parses RFC 7231 compliant headers.
 
-:author:    direct Netware Group
-:copyright: (C) direct Netware Group - All rights reserved
-:package:   rfc_basics.py
-:since:     v0.1.0
-:license:   https://www.direct-netware.de/redirect?licenses;mpl2
-            Mozilla Public License, v. 2.0
+:author:     direct Netware Group
+:copyright:  (C) direct Netware Group - All rights reserved
+:package:    pas
+:subpackage: rfc_basics
+:since:      v1.0.0
+:license:    https://www.direct-netware.de/redirect?licenses;mpl2
+             Mozilla Public License, v. 2.0
     """
 
     RE_HEADER_FIELD_ESCAPED = re.compile("(\\\\+)$")
     """
 RegExp to find escape characters
+    """
+    RE_HEADER_FOLDED_LINE = re.compile("\\r\\n((\\x09)(\\x09)*|(\\x20)(\\x20)*)(\\S)")
+    """
+Regular expression to find folded lines
     """
 
     @staticmethod
@@ -49,7 +54,7 @@ Find the position of the given character.
 
 :return: (str) List containing str or dict if a field name was identified;
          False on error
-:since:  v0.1.0
+:since:  v1.0.0
         """
 
         next_position = position
@@ -79,7 +84,7 @@ Returns a RFC 7231 compliant list of fields from a header message.
 :param field_separator: Separator between key-value pairs; None to not parse it
 
 :return: (list) List containing str or dict if a field name was identified
-:since:  v0.1.0
+:since:  v1.0.0
         """
 
         _return = [ ]
@@ -123,6 +128,48 @@ Returns a RFC 7231 compliant list of fields from a header message.
             else: field = field.strip()
 
             _return.append(field)
+        #
+
+        return _return
+    #
+
+    @staticmethod
+    def get_headers(data):
+        """
+Parses a string of headers.
+
+:param data: String of headers
+
+:return: (dict) Dict with parsed headers; None on error
+:since:  v1.0.0
+        """
+
+        _return = None
+
+        if (str is not Binary.UNICODE_TYPE and type(data) is Binary.UNICODE_TYPE): data = Binary.str(data)
+
+        if (isinstance(data, str) and len(data) > 0):
+            data = Basics.RE_HEADER_FOLDED_LINE.sub("\\2\\4\\6", data)
+            _return = { }
+
+            headers = data.split("\r\n")
+
+            for header_line in headers:
+                header = header_line.split(":", 1)
+
+                if (len(header) == 2):
+                    header_name = header[0].strip().lower()
+                    header[1] = header[1].strip()
+
+                    if (header_name in _return):
+                        if (type(_return[header_name]) is list): _return[header_name].append(header[1])
+                        else: _return[header_name] = [ _return[header_name], header[1] ]
+                    else: _return[header_name] = header[1]
+                elif (len(header[0]) > 0):
+                    if ("@nameless" in _return): _return['@nameless'] += "\n" + header[0].strip()
+                    else: _return['@nameless'] = header[0].strip()
+                #
+            #
         #
 
         return _return

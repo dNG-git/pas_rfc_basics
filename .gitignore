@@ -1,12 +1,12 @@
 __py*
 .*
+*.egg-info
 *.pyc
 nbproject
 /_extras
 /build
 /dist
-/dng_rfc_basics*
-/make*.py*
+/makefile.*
 /MANIFEST
-/py_rfc_basics*
-/rfc_basics.py.*
+/pas_rfc_basics*
+/pas-rfc-basics*

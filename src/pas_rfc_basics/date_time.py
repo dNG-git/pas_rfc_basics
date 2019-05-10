@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 """
-RFC basics for Python
-Easy to use and RFC compliant methods
+direct PAS
+Python Application Services
 ----------------------------------------------------------------------------
 (C) direct Netware Group - All rights reserved
-https://www.direct-netware.de/redirect?py;rfc_basics
+https://www.direct-netware.de/redirect?pas;rfc_basics
 
 This Source Code Form is subject to the terms of the Mozilla Public License,
 v. 2.0. If a copy of the MPL was not distributed with this file, You can
@@ -13,7 +13,7 @@ obtain one at http://mozilla.org/MPL/2.0/.
 ----------------------------------------------------------------------------
 https://www.direct-netware.de/redirect?licenses;mpl2
 ----------------------------------------------------------------------------
-#echo(pyRfcBasicsVersion)#
+#echo(pasRfcBasicsVersion)#
 #echo(__FILEPATH__)#
 """
 
@@ -27,30 +27,19 @@ import time
 try: from pytz import timezone
 except ImportError: timezone = None
 
-try:
-    _PY_STR = unicode.encode
-    _PY_UNICODE_TYPE = unicode
-except NameError:
-    _PY_STR = bytes.decode
-    _PY_UNICODE_TYPE = str
-#
-
-class Basics(object):
+class DateTime(object):
     """
-This class provides basic functions described in different RFCs.
+This class provides basic functions to handle date and time related RFCs.
 
 :author:     direct Netware Group
 :copyright:  (C) direct Netware Group - All rights reserved
-:package:    rfc_basics.py
-:since:      v0.1.0
+:package:    pas
+:subpackage: rfc_basics
+:since:      v1.0.0
 :license:    https://www.direct-netware.de/redirect?licenses;mpl2
              Mozilla Public License, v. 2.0
     """
 
-    RE_HEADER_FOLDED_LINE = re.compile("\\r\\n((\\x09)(\\x09)*|(\\x20)(\\x20)*)(\\S)")
-    """
-Regular expression to find folded lines
-    """
     RFC850_DAYS = [ "Monday", "Tuesday", "Wednesday‎", "Thursday‎", "Friday", "Saturday‎", "Sunday" ]
     """
 RFC 5322 day names
@@ -65,50 +54,6 @@ RFC 5322 month names
     """
 
     @staticmethod
-    def get_headers(data):
-        """
-Parses a string of headers.
-
-:param data: String of headers
-
-:return: (dict) Dict with parsed headers; None on error
-:since:  v0.1.0
-        """
-
-        # global: _PY_STR, _PY_UNICODE_TYPE
-
-        _return = None
-
-        if (str is not _PY_UNICODE_TYPE and type(data) is _PY_UNICODE_TYPE): data = _PY_STR(data, "utf-8")
-
-        if (isinstance(data, str) and len(data) > 0):
-            data = Basics.RE_HEADER_FOLDED_LINE.sub("\\2\\4\\6", data)
-            _return = { }
-
-            headers = data.split("\r\n")
-
-            for header_line in headers:
-                header = header_line.split(":", 1)
-
-                if (len(header) == 2):
-                    header_name = header[0].strip().lower()
-                    header[1] = header[1].strip()
-
-                    if (header_name in _return):
-                        if (type(_return[header_name]) is list): _return[header_name].append(header[1])
-                        else: _return[header_name] = [ _return[header_name], header[1] ]
-                    else: _return[header_name] = header[1]
-                elif (len(header[0]) > 0):
-                    if ("@nameless" in _return): _return['@nameless'] += "\n" + header[0].strip()
-                    else: _return['@nameless'] = header[0].strip()
-                #
-            #
-        #
-
-        return _return
-    #
-
-    @staticmethod
     def get_iso8601_datetime(timestamp, date = True, _time = True):
         """
 Returns the ISO-8601 compliant date and time for an UNIX timestamp. Please
@@ -117,7 +62,7 @@ note that timezone names can only be handled if pytz is available.
 :param timestamp: UNIX timestamp
 
 :return: (str) ISO-8601 compliant date and / or time
-:since:  v0.1.0
+:since:  v1.0.0
         """
 
         time_struct = time.gmtime(timestamp)
@@ -137,7 +82,7 @@ note that timezone names can only be handled if pytz is available.
 :param value: ISO-8601 compliant date and / or time
 
 :return: (int) UNIX timestamp
-:since:  v0.1.0
+:since:  v1.0.0
         """
 
         if (current_day and (not date)):
@@ -229,13 +174,13 @@ Returns a RFC 5322 compliant date and time.
 :param timestamp: UNIX timestamp
 
 :return: (str) RFC 5322 compliant date and time
-:since:  v0.1.0
+:since:  v1.0.0
         """
 
         time_struct = time.gmtime(timestamp)
         _return = time.strftime("%%a, %d %%b %Y %H:%M:%S GMT", time_struct)
-        _return = _return.replace("%a", Basics.RFC5322_DAYS[time_struct.tm_wday], 1)
-        _return = _return.replace("%b", Basics.RFC5322_MONTHS[time_struct.tm_mon - 1], 1)
+        _return = _return.replace("%a", DateTime.RFC5322_DAYS[time_struct.tm_wday], 1)
+        _return = _return.replace("%b", DateTime.RFC5322_MONTHS[time_struct.tm_mon - 1], 1)
 
         return _return
     #
@@ -248,13 +193,13 @@ Returns the UNIX timestamp for a RFC 5322 compliant date and time.
 :param _datetime: RFC 5322 compliant date and time
 
 :return: (int) UNIX timestamp
-:since:  v0.1.0
+:since:  v1.0.0
         """
 
         re_result = re.match("(\\w{3}, )*(\\d{1,2}) (\\w{3}) (\\d{2,4}) (\\d{1,2}):(\\d{1,2}):(\\d{1,2}) (\\w{3}|[+\\-]\\d{1,2}:\\d{1,2})$", _datetime)
         if (re_result is None): raise ValueError("Given date and time is not RFC 5322 compliant formatted")
 
-        mon = 1 + Basics.RFC5322_MONTHS.index(re_result.group(3))
+        mon = 1 + DateTime.RFC5322_MONTHS.index(re_result.group(3))
 
         timezone_format = ("%z" if (":" in re_result.group(7)) else ("%Z"))
 
@@ -270,7 +215,7 @@ Returns the UNIX timestamp for a RFC 5322 compliant date and time.
                                         "%d %m %Y %H:%M:%S " + timezone_format
                                        )
         else:
-            wday = Basics.RFC5322_DAYS.index(re_result.group(1)[:-2])
+            wday = DateTime.RFC5322_DAYS.index(re_result.group(1)[:-2])
             wday = (0 if (wday > 5) else 1 + wday)
 
             time_struct = time.strptime("{0}, {1} {2:0=2d} {3} {4}:{5}:{6} {7}".format(wday,
@@ -297,24 +242,24 @@ Returns the UNIX timestamp for a RFC 7231 compliant date and time.
 :param _datetime: RFC 7231 compliant date and time
 
 :return: (int) UNIX timestamp
-:since:  v0.1.0
+:since:  v1.0.0
         """
 
         # pylint: disable=broad-except
 
         _return = None
 
-        try: _return = Basics.get_rfc5322_timestamp(_datetime)
+        try: _return = DateTime.get_rfc5322_timestamp(_datetime)
         except Exception: pass
 
         if (_return is None): # RFC 850
             re_result = re.match("(\\w{6,9}), (\\d{1,2})-(\\w{3})-(\\d{2}) (\\d{1,2}):(\\d{1,2}):(\\d{1,2}) (\\w{3}|[+\\-]\\d{1,2}:\\d{1,2})$", _datetime)
 
             if (re_result is not None):
-                wday = Basics.RFC850_DAYS.index(re_result.group(1))
+                wday = DateTime.RFC850_DAYS.index(re_result.group(1))
                 wday = (0 if (wday > 5) else 1 + wday)
 
-                mon = 1 + Basics.RFC5322_MONTHS.index(re_result.group(3))
+                mon = 1 + DateTime.RFC5322_MONTHS.index(re_result.group(3))
 
                 timezone_format = ("%z" if (":" in re_result.group(7)) else ("%Z"))
                 _return = timegm(time.strptime("{0:d}, {1} {2:0=2d} {3} {4}:{5}:{6} {7}".format(wday, re_result.group(2), mon, re_result.group(4), re_result.group(5), re_result.group(6), re_result.group(7), re_result.group(8)), "%w, %d %m %y %H:%M:%S " + timezone_format))

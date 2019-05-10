@@ -1,10 +1,14 @@
 ----------------------------------------------------------------------------
-RFC basics for Python
-Easy to use and RFC compliant methods
+direct PAS
+Python Application Services
 ----------------------------------------------------------------------------
 
-RFC Basics is a Python module intended to implement missing RFC standards
-used for different purposes.
+The Python Application Services of the direct Netware Group contain
+different modules. Each represents one aspect, feature or provides the base
+functionality for other modules.
+
+"pas-rfc-basics" is a Python module intended to implement RFC standards used
+for different purposes.
 
 ----------------------------------------------------------------------------
 Licensing
