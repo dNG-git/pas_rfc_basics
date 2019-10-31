@@ -53,6 +53,12 @@ RFC 5322 day names
 RFC 5322 month names
     """
 
+    __slots__ = [ ]
+    """
+python.org: __slots__ reserves space for the declared variables and prevents
+the automatic creation of __dict__ and __weakref__ for each instance.
+    """
+
     @staticmethod
     def get_iso8601_datetime(timestamp, date = True, _time = True):
         """
