@@ -43,6 +43,10 @@ Returns the version currently in development.
     return "v1.0.0"
 #
 
+with open("requirements.txt", "r") as fp:
+    requirements_list = [ line.strip() for line in fp.readlines() if line.strip() != "" ]
+#
+
 with TemporaryDirectory(dir = ".") as build_directory:
     parameters = { "pasRfcBasicsVersion": get_version() }
 
@@ -58,6 +62,7 @@ with TemporaryDirectory(dir = ".") as build_directory:
     _setup = { "version": get_version()[1:],
                "package_dir": { "": package_dir },
                "packages": [ "pas_rfc_basics" ],
+               "install_requires": requirements_list,
                "data_files": [ ( "docs", [ "LICENSE", "README" ]) ],
                "test_suite": "tests"
              }
