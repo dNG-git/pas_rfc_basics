@@ -155,7 +155,7 @@ Parses a string of headers.
         if (str is not Binary.UNICODE_TYPE and type(data) is Binary.UNICODE_TYPE): data = Binary.str(data)
 
         if (isinstance(data, str) and len(data) > 0):
-            data = Basics.RE_HEADER_FOLDED_LINE.sub("\\2\\4\\6", data)
+            data = Header.RE_HEADER_FOLDED_LINE.sub("\\2\\4\\6", data)
             _return = { }
 
             headers = data.split("\r\n")
